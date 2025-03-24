@@ -142,7 +142,7 @@ class LogDiary(models.Model):
                 self.description = f"Review declined (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
             case "Reviewer_Mark_as_Reviewed_Request":
                 self.description = f"Review marked as reviewed (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
-            case "Requester_Downloads_Review":
+            case "Requester_Downloaded_Review":
                 self.description = f"Review downloaded (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
             case _:
                 self.description = f"Unknown action: {self.action} at {self.date} - Info: {self.additional_info}"

@@ -9,6 +9,7 @@ import bisect
 import glob
 import shutil
 import sys
+import time
 
 from typing import Optional, List
 
@@ -293,13 +294,21 @@ def execute_pending_requests():
 
         # Update the status of the translation request
         cursor.execute("UPDATE xliff_manager_translationsrequests SET status='Received_from_LLM', date_received_from_llm=? WHERE id=?", (time.strftime('%Y-%m-%d %H:%M:%S'), str(id)))
-        conn.commit()
+        
 
         # Update the LogDiary with this request solved
-        additional_info = f"The request (id: {id}) has been resolved by the LLM. The generated file is\
-              {translation_file_generated}. The files are source:{source_xliff_file}, target:{target_xliff_file_name},\
-              prompt_addition: {prompt_addition_file}, literals to exclude: {literals_to_exclude_file}, literal patterns to exclude: {literalpatterns_to_exclude_file}"
-        cursor.execute("INSERT INTO xliff_manager_logdiary (action, translation_request_id, additional_info) VALUES (?, ?, ?)", ("Translation_Received_from_LLM", id, additional_info))
+        additional_info = f"The request Id: {id} has been resolved by the LLM.\
+              The files are source:{source_xliff_file}, target:{target_xliff_file_name},\
+              prompt_addition: {prompt_addition_file if prompt_addition_file else "-"},\
+              literals to exclude: {literals_to_exclude_file if literalpatterns_to_exclude_file else "-"},\
+              literal patterns to exclude: {literalpatterns_to_exclude_file if literalpatterns_to_exclude_file else "-"}\
+              The user assigned is 1 but it is unrelated."
+
+        current_time = time.strftime('%Y-%m-%d %H:%M:%S')
+
+        cursor.execute("INSERT INTO xliff_manager_logdiary (user_id, date, action, translation_request_id, additional_info, description) VALUES (?,    ?, ?, ?, ?, ?)", (1, current_time, "Translation_Received_from_LLM", id, additional_info, additional_info))
+
+        conn.commit()
 
     # Close the database connection
     conn.close()

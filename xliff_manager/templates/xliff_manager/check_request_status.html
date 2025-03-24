@@ -49,7 +49,6 @@
                                 Not yet Available
                             {% endif %}
                         </td>
-                        
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -68,6 +67,7 @@
                     <th scope="col">Requester </th>
                     <th scope="col">Reviewer Comments</th>
                     <th scope="col">File included</th>
+                    <th scope="col">Business Reviewed File</th>
                 </tr>
             </thead>
             <tbody class="table-group-divider">
@@ -98,10 +98,16 @@
                         {% endif %}
                         </td>
                     <td>
-                        <a href="{% url 'download_file' type='review_request' id=request.id file_to_download=request.target_xliff_file %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
+                        <a href="{% url 'download_file' type='review_request_source_file' id=request.id file_to_download=request.target_xliff_file %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
                     </td>
-
-                </tr>
+                    <td>
+                        {% if request.status == 'Reviewed' %}
+                            <a href="{% url 'download_file' type='review_request_target_file' id=request.id file_to_download=request.target_xliff_file %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
+                        {% else %}
+                            Not in Reviewed Status
+                        {% endif %}    
+                    </td>
+                    </tr>
                 {% endfor %}
             </tbody>
         </table>

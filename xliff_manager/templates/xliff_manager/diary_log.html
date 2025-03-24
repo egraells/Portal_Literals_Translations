@@ -6,42 +6,76 @@
     <i class="bi bi-calendar-date" style="font-size: 2rem; color: #0d6efd;margin-right: 5px"></i>
     Log Diary
 </h1>
+<a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
 
 <div style="margin-top: 15px; margin-bottom: 15px">
-    <ul>
-        <li>This is a chronological log of all the actions performed by the system.
-    </ul>
+    <h3>Legend and expected sequence of events</h3>
+    The infomation provided in this Log is as follows:
+    <p>1. Time when the event happened: all dates are shown in GMT format 
+        <span class="badge text-bg-primary rounded-pill">YYYY-MM-DD hh:mm:ss</span>
+    </p>
+    <p>3. The user that genereated the event 
+        <span class="badge text-bg-secondary rounded-pill">
+            <i class="bi bi-person"></i> User firstname
+        </span>
+    </p>
+    <p>3. Event happened:
+        <span class="badge text-bg-dark rounded-pill">1. Created Request Translation to AI</span>
+        <span class="badge text-bg-dark rounded-pill">2. The AI generated the translations.</span>
+        <span class="badge text-bg-dark rounded-pill">3. Requested a Business Review</span>
+        <span class="badge text-bg-dark rounded-pill">4. A Business Reviewer visualizes a Request </span>
+        <span class="badge text-bg-dark rounded-pill">5. A Business Reviewer provides adjustments for some literals.</span>
+        <span class="badge text-bg-dark rounded-pill">6. The reviewer mark as Reviewed.</span>
+        <span class="badge text-bg-dark rounded-pill">7. The requester downloaded the already Reviewed file.</span>
+    <p>4. Additional information about the event.</p>
 </div>
 
-<a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
 
 <h2 style="margin-top: 50px">Diary Log (newer to older)</h5>
     {% for activity in activity_list%}
     <ul class="list-group list-group-flush">
         <li class="list-group-item" style="padding-top:2px; padding-bottom:2px; ">
-            {{ activity.date|date:"Y-m-d H:i:s" }} 
-            <span class="badge text-bg-light rounded-pill">{{ activity.user.first_name }}</span>
+            <span class="badge text-bg-primary rounded-pill">
+                <i class="bi bi-calendar-date"></i>
+                {{ activity.date|date:"Y-m-d H:i:s" }} 
+            </span>
+
+            <span class="badge text-bg-secondary rounded-pill">
+                <i class="bi bi-person"></i>
+                {{ activity.user.first_name }}
+            </span>
             
             {% if activity.action == 'Requester_Request_Translation_to_LLM' %}
-                <span class="badge text-bg-primary rounded-pill">{{ activity.action }}</span>
+                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
                 <samp>Id: {{ activity.translation_request_id }}.</samp>
                 <samp>Details: {{ activity.additional_info }}.</samp>
             {%endif%}
             
             {% if activity.action == 'Requester_Requests_Business_Review' %}
-                <span class="badge text-bg-success rounded-pill">{{ activity.action }}</span>
+                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
                 <samp>Id: {{ activity.review_request_id }} was created.</samp>
                 <samp>Details: {{ activity.additional_info }}.</samp>
             {%endif%}
             
             {% if activity.action == 'Reviewer_Visualizes_Request' %}
-                <span class="badge text-bg-secondary rounded-pill">{{ activity.action }}</span>
+                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
                 <samp>Id: {{ activity.review_request_id }} was visualized.</samp>
             {%endif%}
             
             {% if activity.action == 'Reviewer_Saves_Custom_Translations' %}
-                <span class="badge text-bg-warning rounded-pill">{{ activity.action }}</span>
+                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
                 <samp>Id: {{ activity.review_request_id }} was modified.</samp>
+                <samp>Details: {{ activity.additional_info }}.</samp>
+            {%endif%}
+
+            {% if activity.action == 'Requester_Downloaded_Review' %}
+                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
+                <samp>File reviewed for request: {{ activity.review_request_id }} was downloaded.</samp>
+                <samp>Details: {{ activity.additional_info }}.</samp>
+            {%endif%}
+
+            {% if activity.action == 'Translation_Received_from_LLM' %}
+                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
                 <samp>Details: {{ activity.additional_info }}.</samp>
             {%endif%}
         </li>
