@@ -1,0 +1,93 @@
+{% extends 'base_template.html' %}
+
+
+{% block body %}
+<h1>🌍  Request AI Translation </h1>
+<a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+<a href="{% url 'check_request_status' %}" class="btn btn-primary">Check Requests Status</a>
+
+<div class="row" style="margin-bottom: 15px; margin-top: 15px">
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-body">
+                <h5>Language Selection</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for={{lang_select_form.languages.id_for_label}} class="form-label">
+                            {{lang_select_form.languages.label}}
+                        </label>
+                        {{lang_select_form.languages}}
+                        {{lang_select_form.languages.errors}}
+                    </div>
+                    <input type="hidden" name="selected_language" value="{{ lang_select_form.languages.value }}">
+                    <button type="submit" name="action" value="language_selected" class="btn btn-primary">
+                        Choose this language
+                    </button>
+                    <button type="submit" name="action" value ="language_reset" class="btn btn-secondary">
+                        Reset
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+        
+{% if selected_lang_id != 0 and selected_lang_id is not none %}
+    <div class="row" style="margin-bottom: 15px">
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-body">
+                    {% if selected_language != 0 %}
+                        <span class="d-inline-flex mb-3 px-2 py-1 fw-semibold text-success-emphasis bg-primary-subtle border border-success-subtle rounded-2">
+                            (Currently selected language: {{selected_lang_name}} ) 
+                        </span>
+                    {%endif%}
+                    <h5>✨ Translate an XLIFF file</h5>
+                    <form method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="selected_lang_id" value="{{ selected_lang_id }}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <h6>File to be translated</h6>
+                            <label for="{{ req_trans_form.xliff_source_file.id_for_label }}" class="form-label">
+                                {{ req_trans_form.xliff_source_file.label }}
+                            </label>
+                            {{ req_trans_form.xliff_source_file }}
+                            {{ req_trans_form.xliff_source_file.errors}}
+                        </div>
+                        <div class="mb-3">
+                            <h6>Additional prompt instructions</h6>
+                            <label for="{{ req_trans_form.prompt_addition_file.id_for_label }}" class="form-label">
+                                {{ req_trans_form.prompt_addition.label }}
+                            </label>
+                            {{ req_trans_form.prompt_addition_file }}
+                            {{ req_trans_form.prompt_addition_file.errors}}
+                        </div>
+                        <div class="mb-3">
+                            <h6>File with literals to be excluded</h6>
+                            <label for="{{ req_trans_form.literal_ids_to_exclude_file.id_for_label }}" class="form-label">
+                                {{ req_trans_form.literal_ids_to_exclude_file.label }}
+                            </label>
+                            {{ req_trans_form.literal_ids_to_exclude_file }}
+                            {{ req_trans_form.literal_ids_to_exclude_file.errors}}
+                        </div>
+                        <div class="mb-3">
+                            <h6>Exclusion patterns</h6>
+                            <label for="{{ req_trans_form.literal_patterns_to_exclude_file.id_for_label }}" class="form-label">
+                                {{ req_trans_form.literal_patterns_to_exclude_file.label }}
+                            </label>
+                            {{ req_trans_form.literal_patterns_to_exclude_file }}
+                            {{ req_trans_form.literal_patterns_to_exclude_file.errors}}
+                        </div>
+                        <button type="submit" name="action" value ="translate_xliff" class="btn btn-primary">
+                            Translate to {{selected_lang_name}}
+                        </button>
+                        <br />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>   
+{% endif %}
+
+{% endblock %}

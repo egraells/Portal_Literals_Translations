@@ -1,0 +1,51 @@
+{% extends 'base_template.html' %}
+
+
+{% block body %}
+<h1 class="mb-4">
+    <i class="bi bi-calendar-date" style="font-size: 2rem; color: #0d6efd;margin-right: 5px"></i>
+    Log Diary
+</h1>
+
+<div style="margin-top: 15px; margin-bottom: 15px">
+    <ul>
+        <li>This is a chronological log of all the actions performed by the system.
+    </ul>
+</div>
+
+<a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+
+<h2 style="margin-top: 50px">Diary Log (newer to older)</h5>
+    {% for activity in activity_list%}
+    <ul class="list-group list-group-flush">
+        <li class="list-group-item" style="padding-top:2px; padding-bottom:2px; ">
+            {{ activity.date|date:"Y-m-d H:i:s" }} 
+            <span class="badge text-bg-light rounded-pill">{{ activity.user.first_name }}</span>
+            
+            {% if activity.action == 'Requester_Request_Translation_to_LLM' %}
+                <span class="badge text-bg-primary rounded-pill">{{ activity.action }}</span>
+                <samp>Id: {{ activity.translation_request_id }}.</samp>
+                <samp>Details: {{ activity.additional_info }}.</samp>
+            {%endif%}
+            
+            {% if activity.action == 'Requester_Requests_Business_Review' %}
+                <span class="badge text-bg-success rounded-pill">{{ activity.action }}</span>
+                <samp>Id: {{ activity.review_request_id }} was created.</samp>
+                <samp>Details: {{ activity.additional_info }}.</samp>
+            {%endif%}
+            
+            {% if activity.action == 'Reviewer_Visualizes_Request' %}
+                <span class="badge text-bg-secondary rounded-pill">{{ activity.action }}</span>
+                <samp>Id: {{ activity.review_request_id }} was visualized.</samp>
+            {%endif%}
+            
+            {% if activity.action == 'Reviewer_Saves_Custom_Translations' %}
+                <span class="badge text-bg-warning rounded-pill">{{ activity.action }}</span>
+                <samp>Id: {{ activity.review_request_id }} was modified.</samp>
+                <samp>Details: {{ activity.additional_info }}.</samp>
+            {%endif%}
+        </li>
+    </ul>
+    {% endfor %}
+
+{% endblock %}

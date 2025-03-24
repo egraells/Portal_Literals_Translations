@@ -1,0 +1,31 @@
+{% extends 'base_template.html' %}
+
+{% block body %}
+
+<h1 class="mb-4">Declining the request</h1>
+<a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+<a href="{% url 'choose_review_view' %}" class="btn btn-primary">Pending Reviews</a>
+
+
+{% if not user_confirmed %}
+    <div class="alert alert-success" role="alert" style="margin-top: 20px;">    
+        <p>This request will be marked as <b>Declined</b>.</p>
+        <p>The user <b>{{request.technical_user.first_name}} {{request.technical_user.last_name}}</b> will be notified.</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="justification">Provide a justification to inform the requester on thi root cause for this decline:</label>
+            <textarea class="form-control" id="justification" name="justification" rows="3" required></textarea>
+        </div>
+        <button type="submit" name="action" value="decline_request_confirmed" class="btn btn-primary mt-3">Decline</button>
+    </form>
+
+{% else %}
+    <div class="alert alert-success" role="alert" style="margin-top: 20px;">    
+        <p>This request (id:{{ request.id}}) has been marked as <b>Declined</b> and the requester has been informed.</p>
+    </div>
+{% endif %}
+
+{% endblock %}

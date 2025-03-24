@@ -1,0 +1,88 @@
+{% extends 'base_template.html' %}
+
+{% block additional_css %}
+        <style>
+          .highlight {
+            border-color: blue;
+          }
+        </style>
+{% endblock %}
+
+{% block body %}
+
+<h1 class="mb-4"> <i class="bi bi-clipboard-check"></i> Reviewing a Request</h1>
+
+<div class="card border-light text-bg-light" style="margin-bottom:30px">
+  <div class="card">
+    <div class="card-header"> Request Details</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><b>Requester:</b> {{review_request.technical_user.first_name}} {{review_request.technical_user.last_name}}
+          requested  <b>on: </b>{{review_request.date_created |date:"Y/m/d H:i"}}, 
+          containing <b>{{translations | length}} translations</b>.</li>
+          {% if review_request.requester_comment or review_request.info_tag%}
+        <li class="list-group-item"><b>Comment:</b> <i>"{{review_request.requester_comment|default:'-'}}" </i>
+          {% endif %}
+          {% if review_request.info_tag%}
+          and <b> was Tagged as:</b> {{review_request.info_tag|default_if_none:'-'}}.</li>
+          {% endif %}
+        <li class="list-group-item"><b>Status:</b> 
+          </b> <span class="badge rounded-pill text-bg-light">{{review_request.status}}</span>
+        </li>
+      </ul>
+  </div>
+</div>
+
+<h2>Considerations</h2>
+<ol>
+  <li>Providing an explanation in the <b>Comments</b>, it is essential to improve the next iterations.</li>
+  <li>The <b style="color:#0d6efd">Save Changes</b> action is required to persist the changes you made and notify the requester.</li>
+  <li>You can change and apply adjustemnts as many times as you require. When you have finished, click on <b style="color:#198754;">Mark as Reviewed</b>.</li>
+  <li>If for anya reason, you consider thatn the request is not valid, click on <b style="color:#dc3545;">Decline this review</b>.</li>
+</ol>
+
+<form name="save_changes_form" method="post"> 
+  <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+  <button type="submit" name="action" value="save_changes" class="btn btn-primary">Save Changes</button>
+  {% if review_request.status == 'Reviewed' %}
+    <button type="submit" name="action" value="mark_as_reviewed" class="btn btn-outline-success" disabled>Already Marked as Reviewed</button>
+  {%else%}
+    <button type="submit" name="action" value="mark_as_reviewed" class="btn btn-success">Mark as Reviewed</button>
+  {% endif %}
+  <button type="submit" name="action" value="decline_review" class="btn btn-danger">Decline this Review</button>
+  {% csrf_token %}
+  <table class="table table-hover table-responsive table-sm" style="margin-top:15px">
+    <caption>These are all the {{translations|length}} translations for this request.</caption>
+    <thead>
+      <tr scope="row">
+        <th scope="col"></th>
+        <th scope="col">Salesforce ID</th>
+        <th scope="col">Master Language</th>
+        <th scope="col">AI translation</th>
+        <th scope="col">Provide your Translation</th>
+        <th scope="col">Your Comments</th>
+      </tr>
+    </thead>
+    <tbody class="table-group-divider">
+    {% for translation in translations %}
+      <tr scope="row">
+        <td>{{ forloop.counter }}</td>
+        <td style="word-wrap: break-word;min-width: 160px;max-width: 100px;">{{ translation.salesforce_id }}</td>
+        <td style="word-wrap: break-word;min-width: 160px;max-width: 200px;">{{ translation.source }}</td>
+        <td style="word-wrap: break-word;min-width: 160px;max-width: 200px;">{{ translation.ai_translation }}</td>
+        <td>
+          <textarea class="form-control" name="editable_translation_{{ forloop.counter }}">{{ translation.reviewer_translation|default_if_none:''  }}</textarea>
+        </td>
+        <td>
+            <textarea class="form-control" name="comments_{{ forloop.counter }}">{{ translation.reviewer_comment|default_if_none:'' }}</textarea>
+        </td>
+        <input type="hidden" name="previous_reviewer_translation_{{ forloop.counter }}" value="{{ translation.reviewer_translation|default_if_none:''  }}">
+        <input type="hidden" name="previous_reviewer_comment_{{ forloop.counter }}" value="{{ translation.reviewer_comment|default_if_none:''  }}">
+        <input type="hidden" name="trans_unit_id_{{ forloop.counter }}" value="{{ translation.id }}">
+        <input type="hidden" name="request_id" value="{{ translation.request_id }}">
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</form>
+
+{% endblock %}

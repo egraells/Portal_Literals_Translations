@@ -1,0 +1,108 @@
+{% extends 'base_template.html' %}
+
+
+{% block body %}
+<h1 class="mb-4">
+    <i class="bi bi-stoplights" style="font-size: 2rem; color: #0d6efd;margin-right: 5px"></i>
+    My pending Reviews
+</h1>
+
+<div style="margin-top: 15px; margin-bottom: 15px">
+    <ul>
+        <li>All dates are shown in GMT and with YYYY/MM/DD hh:mm format in chronological order.
+        <li>You can review the same request as many times as required, and <b>Mark as Reviwed</b> whn finished.
+        <li>If for every reason, you can't fullfill the request, just <b>Decline</b> it.
+        <li>Both actions will be notified to the Requester.</li>
+    </ul>
+</div>
+
+<a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+                
+<h2 style="margin-top: 50px">Requests</h5>
+    <table class="table mt-3 table-sm">
+        <thead>
+            <tr class="text-center">
+                <th scope="col">Action</th>
+                <th scope="col">Request Id</th>
+                <th scope="col">Requester</th>
+                <th scope="col">Reviewer</th>
+                <th scope="col">Status</th>
+                <th scope="col">Date Created</th>
+                <th scope="col">Last Date Reviewed</th>
+                <th scope="col">Requester </th>
+                <th scope="col">Reviewer Comments</th>
+                <th scope="col">File uploaded</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            {% for request in review_requests %}
+            <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+                <tr class="text-center">
+                    <td scope="row">
+                        {% if request.status == 'Requested'  %}
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Default button group">
+                            <button type="submit" name="action" value = "review_selected" class="btn btn-outline-primary">
+                                <i class="bi bi-eye"></i> Review this request
+                            </button>
+                        </div>
+                        {% elif request.status == 'Declined' %}
+                            <button type="button" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                                Back to Requested
+                            </button>
+                        {% elif request.status == 'Reviewed' %}
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Default button group">
+                            <button type="submit" name="action" value = "review_selected" class="btn btn-outline-primary">
+                                <i class="bi bi-eye"></i> Review this request</button>
+                        </div>
+                        {% endif %}
+                        <input type="hidden" name="request_selected_id" value="{{ request.id }}">
+                    </td>
+                    <td>{{ request.id }}</td>
+                    <td>{{ request.technical_user.username }}</td>
+                    <td>{{ request.business_user.username }}</td>
+                    {% if request.status == 'Declined' %}
+                        <td><span class="badge rounded-pill text-bg-danger">{{ request.status }}</span></td>
+                    {% elif request.status == 'Reviewed' %}
+                        <td><span class="badge rounded-pill text-bg-success">{{ request.status }}</span></td>
+                    {% else %}
+                        <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td>
+                    {% endif %} 
+                    <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
+                    <td>{{ request.date_reviewed_by_business|date:"Y/m/d H:i" }}</td>
+                    <td>
+                        {% if request.requester_comment is not None %}
+                            <button type="button" class="btn btn-sm btn-light" 
+                            data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            title="{{ request.requester_comment }}">View Comments</button>
+                        {% else %} - 
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if request.reviewer_comment is not None %}
+                            <button type="button" class="btn btn-sm btn-light" 
+                            data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            title="{{ request.reviewer_comment }}">View Comments</button>
+                        {% elif request.decline_justification is not None %} 
+                            <button type="button" class="btn btn-sm btn-light" 
+                            data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            title="{{ request.decline_justification }}">Decline Justification</button>
+                        {% else %} -
+                        {% endif %}
+                        </td>
+                    <td>
+                        <a class="btn btn-secondary btn-sm" 
+                        href="{% url 'download_file' type='review_request' id=request.id file_to_download=request.target_xliff_file.name %}"><i class="bi bi-file-earmark-arrow-down"></i> Download</a>
+                    </td>
+                </tr>
+            </form>    
+            {% endfor %}
+        </tbody>
+    </table>
+</form>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base_template.html' %}
+
+{% block body %}
+
+<h1 class="mb-4">Review Request has been succesfully registered</h1>
+<a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+<a href="{% url 'choose_review_view' %}" class="btn btn-primary">Pending Reviews</a>
+
+<div class="alert alert-success" role="alert" style="margin-top: 20px;">
+    <p>A request to 🧑‍🦱 <b>{{reviewer}}</b> has been succesfully registered and notified  (identifier: <b>{{request_id}}</b>).</p>
+    <p>This request contains a total of <b>{{ num_records }}<b> translations to be reviewed.</b>
+
+</div>
+
+{% endblock %}

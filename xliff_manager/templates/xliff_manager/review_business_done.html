@@ -1,0 +1,35 @@
+{% extends 'base_template.html' %}
+
+{% block body %}
+
+<h1 class="mb-4">Finishing the review</h1>
+<a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+<a href="{% url 'choose_review_view' %}" class="btn btn-primary">Pending Reviews</a>
+
+
+{% if not user_confirmed %}
+    <div class="alert alert-success" role="alert" style="margin-top: 20px;">    
+        <p>This request will be marked as <b>Reviewed</b>, and 
+         <b>{{request.technical_user.first_name}} {{request.technical_user.last_name}}</b> will be notified.</p>
+        <p>This is none blocking status, and you can keep reviewing the translations on this request 
+            until <b>{{request.technical_user.first_name}} downloads the file</b>. 
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="reviwer_comment">If you want to provide a comment, this will sent to the requester:</label>
+            <textarea class="form-control" id="reviwer_comment" name="reviwer_comment" rows="3"></textarea>
+        </div>
+        <button type="submit" name="action" value="mark_as_reviewed_confirmation" class="btn btn-primary mt-3">Confirm as Reviewed</button>
+    </form>
+
+{% else %}
+    <div class="alert alert-success" role="alert" style="margin-top: 20px;">    
+        <p>This request (id: {{request.id}}) has been marked as <b>Reviewed</b>.
+        <br>The user <b>{{request.technical_user.first_name}} {{request.technical_user.last_name}}</b> has been notified.</p>
+        <p>This status is not blocking, it is just infomrative for you and a way to inform  the requester.<br> You can keep reviewing the translations on this request. 
+    </div>
+{% endif %}
+
+{% endblock %}

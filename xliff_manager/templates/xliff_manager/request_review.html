@@ -1,0 +1,76 @@
+{% extends 'base_template.html' %}
+
+
+{% block body %}
+<h1 class="mb-4">
+    <i class="bi bi-ui-checks" style="font-size: 2rem; color: #0d6efd;margin-right: 5px"></i>
+    Request a Business Review
+</h1>
+
+<a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+<a href="{% url 'check_request_status' %}" class="btn btn-outline-primary">Check AI Traslation Requests Status</a>
+
+<div class="row" style="margin-top: 15px">
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-body">
+                <p>A review is a request for a business representative to review a file translated by the AI engine.</p>
+                <form method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="selected_lang_id" value="{{ selected_lang_id }}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <h6>Upload the translations file </h6>
+                        <label for="xliff_translations_file" class="form-label">Upload the file and name the Release to be reviewed by the business team.</label>
+                        <input type="file" class="form-control" id="xliff_translations_file" name="xliff_translations_file" required>
+                    </div>
+                    <label for="release" class="form-label">
+                        Optionally tag this request. Check the bellow existing list to follow the same pattern.
+                    </label>
+                    <input type="text" class="form-control" id="tag" name="tag">
+                    <div class="mb-3" style="margin-top: 10px">
+                        <label for="current_tags" class="form-label">Tags used:</label>
+                        {% for tag in tags_used %}
+                            <small class="d-inline-flex mb-3 px-2 py-1 fw-semibold text-secondary-emphasis bg-secondary-subtle border border-secondry-subtle rounded-2"> 
+                                {{ tag }}
+                            </small>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <h6>Business Reviewer</h6>
+                        <label for="business_reviewer" class="form-label">
+                        Choose the reviewer for this translations:
+                        </label>
+                        <select class="form-select" id="business_reviewer" name="business_reviewer" required>
+                            {% for user in users %}
+                                {{user.id}}
+                                <option value="{{user.id}}">{{ user.first_name}} {{user.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Comments for the reviewer</h6>
+                        <label for="requester_comments" class="form-label">Include anything that you need to communicate to the reviewer:</label>
+                        <textarea class="form-control" id="comments" name="requester_comments" rows="3"></textarea>
+                        <button id="request_review" type="submit" name="action" value ="request_business_review" class="btn btn-primary" style="margin-top: 10px">   
+                            Request the Review for the file attached
+                        </button>
+                        <button class="btn btn-primary" type="button" disabled id="analyzing_file" style="margin-top: 10px">
+                            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                            <span role="status">Analzying the file and preparing it for the reviewer...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.querySelector('form').addEventListener('submit', function() {
+        document.getElementById('analyzing_file').style.display = 'block';
+        document.getElementById('request_review').style.display = 'none';
+    });
+    document.getElementById('analyzing_file').style.display = 'none';
+</script>
+{% endblock %}

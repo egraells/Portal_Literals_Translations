@@ -1,0 +1,39 @@
+{% extends 'base_template.html' %}
+
+
+{% block body %}
+    
+    {% if trans_request is not none %}
+    <div class="row" style="margin-bottom: 15px">
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-body">
+                    <h5>👍 Your Request have been successfully registered</h5>
+                    <p>The system have received your files and the AI engine will now start translating it.</p>
+                    <p>Technical details:</p>
+                    <ul>
+                        <li><b>Unique Id assigned</b>: {{ trans_request.id}}</li>
+                        <li><b>Target Language</b>: {{ trans_request.language}}</li>
+                        <li><b>Source file received (and renamed)</b>: {{ trans_request.source_xliff_file}}</li>
+                        <li><b>Target file that will be generated</b>: {{ trans_request.target_xliff_file}}</li>
+                        <li><b>File with the addition prompt instructions received:</b> {{ trans_request.prompt_addition_file}}</li>
+                        <li><b>File with Literals to be excluded received:</b> {{ trans_request.literals_to_exclude_file}}</li>
+                        <li><b>File with Patterns to exclude received: </b>{{ trans_request.literalpatterns_to_exclude_file}}</li>
+                    </ul>
+                    <p>🗂️ The request has been transfered to the AI engine to generate the translation.</p>
+                    <p>📩 Once the translation are ready, you will receive an email with the download link.</p>
+                </div>
+            </div>
+        </div>
+    </div>   
+    {% endif %}
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{% url 'home' %}" class="btn btn-primary">Back to Home</a>
+            <a href="{% url 'check_request_status' %}" class="btn btn-primary">Check Requests Status</a>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,12 @@
+Do not translate the following words:
+- 1PSP
+- Conga
+- Template
+- Report
+- Envelope 
+- CareProgramEnrollee Id
+- Person_0
+
+For the following words do the translations as indicate
+- "sort order" as "Ordinamento".
+- "Any restrictions" as "Eventuali restrizioni"

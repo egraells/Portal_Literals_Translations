@@ -1,0 +1,111 @@
+{% extends 'base_template.html' %}
+
+{% block body %}
+<body>
+    <div class="container mt-5">
+
+        <h1 class="mb-4">Current Status of all Requests</h1>
+        <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+        <a href="{% url 'request_translation' %}" class="btn  btn-primary">Request a new AI Translation</a>
+        <a href="{% url 'request_review' %}" class="btn  btn-primary">Request Business Review</a>
+
+        <div style="margin-top: 15px; margin-bottom: 15px">
+            <ul>
+                <li>All dates are shown in GMT and with YYYY/MM/DD format
+                <li>Requests are shown from newer to older
+            </ul>
+        </div>
+
+        <h2  style="margin-top: 30px">AI translations requests</h5>
+            <table class="table mt-3 table-sm" >
+                <thead>
+                    <tr class="text-center">
+                        <th scope="col">Request Id</th>
+                        <th scope="col">Target Language</th>
+                        <th scope="col">Requester</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Date Created</th>
+                        <th scope="col">Sent to LLM</th>
+                        <th scope="col">Received from LLM</th>
+                        <th scope="col">Original file</th>
+                        <th scope="col">Translated file</th>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider">
+                    {% for request in translations_requests %}
+                    <tr class="text-center">
+                        <td scope="row">{{ request.id }}</td>
+                        <td>{{ request.language.name }}</td>
+                        <td>{{ request.technical_user.username }}</td>
+                        <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td> 
+                        <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
+                        <td>{{ request.date_sent_to_llm|date:"Y/m/d H:i"}}</td>
+                        <td>{{ request.date_received_from_llm|date:"Y/m/d H:i" }}</td>
+                        <td><a href="{% url 'download_file' type='translations_request' id=request.id file_to_download=request.source_xliff_file.name %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i>Download</a></td>
+                        <td>
+                            {% if request.date_received_from_llm is not None %}
+                                <a href="{% url 'download_file' type='translations_request' id=request.id file_to_download=request.target_xliff_file_name %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
+                                {% else %}
+                                Not yet Available
+                            {% endif %}
+                        </td>
+                        
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        <h2 style="margin-top: 50px"> Business Review Requests</h5>
+        <table class="table mt-3 table-sm" >
+            <thead>
+                <tr class="text-center">
+                    <th scope="col">Request Id</th>
+                    <th scope="col">Requester</th>
+                    <th scope="col">Reviewer</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Date Created</th>
+                    <th scope="col">Date Reviewed</th>
+                    <th scope="col">Requester </th>
+                    <th scope="col">Reviewer Comments</th>
+                    <th scope="col">File included</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for request in review_requests %}
+                <tr class="text-center">
+                    <td scope="row">{{ request.id }}</td>
+                    <td>{{ request.technical_user.username }}</td>
+                    <td>{{ request.business_user.username }}</td>
+                    <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td> 
+                    <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
+                    <td>{{ request.date_reviewed_by_business|date:"Y/m/d H:i" }}</td>
+                    <td>
+                        {% if request.requester_comment is not None %}
+                            <button type="button" class="btn btn-sm btn-light" 
+                            data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            title="{{ request.requester_comment }}">View Comments</button>
+                        {%else%} - 
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if request.reviewer_comment is not None %}
+                            <button type="button" class="btn btn-sm btn-light" 
+                            data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            title="{{ request.reviewer_comment }}">View Comments</button>
+                        {%else%} - 
+                        {% endif %}
+                        </td>
+                    <td>
+                        <a href="{% url 'download_file' type='review_request' id=request.id file_to_download=request.target_xliff_file %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+
+    </div>
+{% endblock %}
