@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.http import FileResponse, HttpResponse
+from django.contrib.auth import logout
 
 from .models import Languages, TranslationsRequests, Translations_Units, ReviewRequests, LogDiary
 
@@ -21,10 +22,7 @@ from .forms.language_selection_form import LanguageSelectionForm
 from postmarker.core import PostmarkClient
 
 
-TRANSLATION_REQUESTS_DIR = "translations_requests"
-REVIEW_REQUESTS_DIR = "review_requests"
-
-
+ROOT_FOLDER = "translations_requests"
 SEND_EMAILS = False
 
 def home(request):
@@ -50,38 +48,14 @@ def login_view(request):
 def download_file(request, type:str, id:str, file_to_download:str):
     if type == 'translations_request':
         file_path = os.path.join('translations_requests', str(id), file_to_download)
-    elif type == 'review_request_source_file':
-        file_path = os.path.join(REVIEW_REQUESTS_DIR, str(id), file_to_download) # or o s.path.join(settings.STATIC_ROOT, 'files', filename)
-    elif type == 'review_request_target_file':
-
-        # Preventive measure as the UI, does not show the button to download 
-        # Check the request is in the right status
-        review_request = ReviewRequests.objects.get(id=id)
-        if review_request.status != 'Reviewed' and review_request.status != 'Requester_Downloaded_Review':
-            return HttpResponse("Request is not in an status that allows downloading the file", status=404)
-        
-        file_path = os.path.join(REVIEW_REQUESTS_DIR, str(id), file_to_download)
+    elif type == 'review_request':
+        file_path = os.path.join('review_requests', str(id), file_to_download) # or o s.path.join(settings.STATIC_ROOT, 'files', filename)
     
     if os.path.exists(file_path):
         with open(file_path, 'rb') as f:
             response = HttpResponse(f.read(), content_type='application/force-download')
             response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
-
-        if type == 'review_request_target_file':
-            # Preventive measure as the UI, does not show the button to download 
-            # Check the request is in the right status
-            review_request = ReviewRequests.objects.get(id=id)
-            if review_request.status != 'Reviewed' and review_request.status != 'Requester_Downloaded_Review':
-                return HttpResponse("Request is not in an status that allows downloading the file", status=404)
-            else:
-                # Log the action in the LogDiary
-                LogDiary.objects.create(
-                    user=request.user,
-                    action="Requester_Downloaded_Review",
-                    review_request_id = review_request.id,
-                )
-        return response
-        
+            return response
     else:
         return HttpResponse("File not found", status=404)
 
@@ -259,17 +233,16 @@ def request_translation_view(request):
             request_translation_form = TranslationForm(request.POST, request.FILES)
             if request_translation_form.is_valid():
                 language_id = request.POST.get('selected_lang_id')
-                user = User.objects.get(id=1), #TODO: aquest hack cal corregir-lo
 
                 # Sanity check: Delete all files in the translations_requests folder
-                for filename in os.listdir(TRANSLATION_REQUESTS_DIR):
-                    file_path = os.path.join(TRANSLATION_REQUESTS_DIR, filename)
+                for filename in os.listdir(ROOT_FOLDER):
+                    file_path = os.path.join(ROOT_FOLDER, filename)
                     if os.path.isfile(file_path):
                         os.remove(file_path)
 
                 trans_request = TranslationsRequests(
                     language = Languages.objects.get(id=language_id),
-                    #request_user = user,
+                    request_user = request.user,
                     source_xliff_file = request.FILES['xliff_source_file'],
                     target_xliff_file_name = request.FILES['xliff_source_file'].name + '_translated.xlf',
                     prompt_addition_file = request.FILES['prompt_addition_file'] if 'prompt_addition_file' in request.FILES else None,
@@ -279,7 +252,7 @@ def request_translation_view(request):
                 trans_request.save()
 
                 # Move files this request to the folder with the Id 
-                dest_folder = os.path.join(TRANSLATION_REQUESTS_DIR, str(trans_request.id)) 
+                dest_folder = os.path.join(ROOT_FOLDER, str(trans_request.id)) 
                 os.makedirs(dest_folder, exist_ok=True)
 
                 source_xliff_file_only_name = os.path.basename(trans_request.source_xliff_file.name)
@@ -288,19 +261,19 @@ def request_translation_view(request):
                 
                 if trans_request.prompt_addition_file:
                     prompt_addition_file_only = os.path.basename(trans_request.prompt_addition_file.name)
-                    shutil.move(os.path.join(TRANSLATION_REQUESTS_DIR, prompt_addition_file_only), 
+                    shutil.move(os.path.join(ROOT_FOLDER, prompt_addition_file_only), 
                                 os.path.join(dest_folder, prompt_addition_file_only))
                     trans_request.prompt_addition_file = prompt_addition_file_only
                 
                 if trans_request.literals_to_exclude_file:
                     exclude_file_name_only = os.path.basename(trans_request.literals_to_exclude_file.name)
-                    shutil.move(os.path.join(TRANSLATION_REQUESTS_DIR, exclude_file_name_only), 
+                    shutil.move(os.path.join(ROOT_FOLDER, exclude_file_name_only), 
                                 os.path.join(dest_folder, exclude_file_name_only))
                     trans_request.literals_to_exclude_file = exclude_file_name_only
                 
                 if trans_request.literalpatterns_to_exclude_file:
                     exclude_patterns_file_name_only = os.path.basename(trans_request.literalpatterns_to_exclude_file.name)
-                    shutil.move(os.path.join(TRANSLATION_REQUESTS_DIR, exclude_patterns_file_name_only), 
+                    shutil.move(os.path.join(ROOT_FOLDER, exclude_patterns_file_name_only), 
                                 os.path.join(dest_folder, exclude_patterns_file_name_only))
                     trans_request.literalpatterns_to_exclude_file = exclude_patterns_file_name_only
 
@@ -391,7 +364,7 @@ def request_review_view(request):
 
                 # When saving the file, we need to move it to the review_requests concret folder
                 review_request = ReviewRequests.objects.get(pk=review_request.pk)
-                dest_folder = os.path.join(REVIEW_REQUESTS_DIR, str(review_request.id))
+                dest_folder = os.path.join('review_requests', str(review_request.id))
                 dest_name = os.path.join(dest_folder, original_xliff_file_name)
                 os.makedirs(dest_folder, exist_ok=True)
                 shutil.move(review_request.target_xliff_file.name, dest_name)
@@ -436,8 +409,9 @@ def request_review_view(request):
 @login_required
 def check_request_status_view(request):
     if request.method == 'GET':
-        translations_requests = TranslationsRequests.objects.all().order_by('-date_created')
-        review_requests = ReviewRequests.objects.all().order_by('-date_created')
+        current_user = request.user
+        translations_requests = TranslationsRequests.objects.filter(request_user=current_user).order_by('-date_created')
+        review_requests = ReviewRequests.objects.filter(technical_user=current_user).order_by('-date_created')
         return render(request, 'xliff_manager/check_request_status.html', 
                       {'translations_requests': translations_requests,
                        'review_requests': review_requests})
@@ -469,3 +443,4 @@ def execute_translation_request(req_transl_pk):
     exclusion_patterns_content = trans_request.literalpatterns_to_exclude_file.read().decode('utf-8') if trans_request.literalpatterns_to_exclude_file else ''
     language_iso_value = trans_request.language_id
     language_iso_txt = Language.objects.get(id=language_iso_value).iso_value
+

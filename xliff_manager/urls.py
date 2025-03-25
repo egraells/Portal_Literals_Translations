@@ -6,6 +6,7 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('home/', views.home, name='home'),
     path('request_translation/', views.request_translation_view, name='request_translation'),
     path('request_translation?start_new=True', views.request_translation_view, name='start_new'),
 
@@ -20,7 +21,7 @@ urlpatterns = [
     path('download_file/<str:type>/<str:id>/<path:file_to_download>/', views.download_file, name='download_file'),
     
     path('login/', LoginView.as_view(template_name='xliff_manager/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
+    path('logout/', LogoutView.as_view(template_name='xliff_manager/logout.html'), name='logout'),
     path('admin/', admin.site.urls),
 
     path('confirm_insertion/<int:num_records>/', views.confirm_insertion_view, name='confirm_insertion'),

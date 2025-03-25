@@ -28,7 +28,7 @@ class TranslationsRequests(models.Model):
     
     id = models.AutoField(primary_key=True)
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
-    #request_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='request_user', null=False, blank=False) #TODO
+    request_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='request_user', null=False, blank=False) #TODO
     source_xliff_file = models.FileField(upload_to=upload_to_folder, blank=False)
     target_xliff_file_name = models.CharField(max_length=200, null=True, blank=True)
     prompt_addition_file = models.FileField(upload_to=upload_to_folder)
@@ -44,8 +44,8 @@ class TranslationsRequests(models.Model):
         if self.status == 'Created':
             # Every time a new translation request is created, we need to send it to the LLM
             # Create a new thread to send translations to the LLM
-            print(f"Request Saved")
-            print(f"A New Thread Should be created to send the translations to the LLM")
+            #print(f"Request Saved")
+            #print(f"A New Thread Should be created to send the translations to the LLM")
             
             """
             def translation_thread():

@@ -25,7 +25,6 @@
                         <th scope="col">Requester</th>
                         <th scope="col">Status</th>
                         <th scope="col">Date Created</th>
-                        <th scope="col">Sent to LLM</th>
                         <th scope="col">Received from LLM</th>
                         <th scope="col">Original file</th>
                         <th scope="col">Translated file</th>
@@ -36,10 +35,9 @@
                     <tr class="text-center">
                         <td scope="row">{{ request.id }}</td>
                         <td>{{ request.language.name }}</td>
-                        <td>{{ request.technical_user.username }}</td>
+                        <td>{{ request.request_user.username }}</td>
                         <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td> 
                         <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
-                        <td>{{ request.date_sent_to_llm|date:"Y/m/d H:i"}}</td>
                         <td>{{ request.date_received_from_llm|date:"Y/m/d H:i" }}</td>
                         <td><a href="{% url 'download_file' type='translations_request' id=request.id file_to_download=request.source_xliff_file.name %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i>Download</a></td>
                         <td>
@@ -63,11 +61,12 @@
                     <th scope="col">Reviewer</th>
                     <th scope="col">Status</th>
                     <th scope="col">Date Created</th>
+                    <th scope="col"><i class="bi bi-tag"></i>Tag</th>
                     <th scope="col">Date Reviewed</th>
-                    <th scope="col">Requester </th>
-                    <th scope="col">Reviewer Comments</th>
-                    <th scope="col">File included</th>
-                    <th scope="col">Business Reviewed File</th>
+                    <th scope="col"></i>Requester Comments</th>
+                    <th scope="col"></i>Reviewer Comments</th>
+                    <th scope="col"></i>Requester file</th>
+                    <th scope="col"></i>Business Reviewed</th>
                 </tr>
             </thead>
             <tbody class="table-group-divider">
@@ -78,13 +77,14 @@
                     <td>{{ request.business_user.username }}</td>
                     <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td> 
                     <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
+                    <td>{{ request.info_tag|default_if_none:"-" }}</td>
                     <td>{{ request.date_reviewed_by_business|date:"Y/m/d H:i" }}</td>
                     <td>
                         {% if request.requester_comment is not None %}
                             <button type="button" class="btn btn-sm btn-light" 
                             data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
-                            title="{{ request.requester_comment }}">View Comments</button>
+                            title="{{ request.requester_comment }}"><i class="bi bi-chat-dots"></i> View Comments</button>
                         {%else%} - 
                         {% endif %}
                     </td>
@@ -93,7 +93,7 @@
                             <button type="button" class="btn btn-sm btn-light" 
                             data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
-                            title="{{ request.reviewer_comment }}">View Comments</button>
+                            title="{{ request.reviewer_comment }}"><i class="bi bi-chat-dots"></i>  View Comments</button>
                         {%else%} - 
                         {% endif %}
                         </td>

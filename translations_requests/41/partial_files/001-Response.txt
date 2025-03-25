@@ -1,0 +1,2 @@
+<trans-unit id="CustomLabel.PSP_ArchiveSearch_Phone" maxwidth="1000" size-unit="char"> <source>Phone</source> <target>Телефон</target></trans-unit>
+<trans-unit id="CustomLabel.PSP_Back" maxwidth="1000" size-unit="char"> <source>Back</source> <target>Назад</target></trans-unit>

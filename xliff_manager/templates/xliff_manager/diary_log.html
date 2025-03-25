@@ -11,23 +11,32 @@
 <div style="margin-top: 15px; margin-bottom: 15px">
     <h3>Legend and expected sequence of events</h3>
     The infomation provided in this Log is as follows:
-    <p>1. Time when the event happened: all dates are shown in GMT format 
-        <span class="badge text-bg-primary rounded-pill">YYYY-MM-DD hh:mm:ss</span>
+    <p>1. <span class="badge text-bg-warning rounded-pill"><i class="bi bi-calendar-date"></i> Date & Time   </span>
+        Time when the event happened: all dates are shown in GMT format 
     </p>
-    <p>3. The user that genereated the event 
-        <span class="badge text-bg-secondary rounded-pill">
+    <p>3.
+        <span class="badge text-bg-success rounded-pill">
             <i class="bi bi-person"></i> User firstname
         </span>
+        The user that genereated the event 
     </p>
-    <p>3. Event happened:
-        <span class="badge text-bg-dark rounded-pill">1. Created Request Translation to AI</span>
-        <span class="badge text-bg-dark rounded-pill">2. The AI generated the translations.</span>
-        <span class="badge text-bg-dark rounded-pill">3. Requested a Business Review</span>
-        <span class="badge text-bg-dark rounded-pill">4. A Business Reviewer visualizes a Request </span>
-        <span class="badge text-bg-dark rounded-pill">5. A Business Reviewer provides adjustments for some literals.</span>
-        <span class="badge text-bg-dark rounded-pill">6. The reviewer mark as Reviewed.</span>
-        <span class="badge text-bg-dark rounded-pill">7. The requester downloaded the already Reviewed file.</span>
-    <p>4. Additional information about the event.</p>
+    <p>3. Expected sequence of events:<p>
+        <p>For a Translation Request:</p>
+        <p class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"></i> A Developer requests for a AI Translation</p>
+        <p class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"></i> The AI generated the translations</p>
+
+        <p>For a Business Review Request:</p>
+        <p class="badge text-bg-secondary rounded-pill"><i class="bi bi-1-circle"></i> A Developer requests for a Business Review</p>
+        <p class="badge text-bg-secondary rounded-pill"><i class="bi bi-2-circle"></i> A Business Reviewer visualizes a Request</p>
+        <p class="badge text-bg-secondary rounded-pill"><i class="bi bi-3-circle"></i> A Business Reviewer provides custom translations for some literals</p>
+        <p class="badge text-bg-secondary rounded-pill"><i class="bi bi-4-circle"></i> A Business Reviewer mark as Reviewed</p>
+        <p class="badge text-bg-secondary rounded-pill"><i class="bi bi-5-circle"></i> A developer downloads the Reviewed file.</p>
+    <p>4. <span class="badge text-bg-info rounded-pill">Id</span> of the request, which might be either:
+        <ul>
+            <li>A Translation Request
+            <li>A Business Request have different Ids.
+        </ul>
+    <p>5. Additional information about the event.</p>
 </div>
 
 
@@ -35,49 +44,52 @@
     {% for activity in activity_list%}
     <ul class="list-group list-group-flush">
         <li class="list-group-item" style="padding-top:2px; padding-bottom:2px; ">
-            <span class="badge text-bg-primary rounded-pill">
+            <span class="badge text-bg-warning rounded-pill">
                 <i class="bi bi-calendar-date"></i>
                 {{ activity.date|date:"Y-m-d H:i:s" }} 
             </span>
 
-            <span class="badge text-bg-secondary rounded-pill">
+            <span class="badge text-bg-success rounded-pill">
                 <i class="bi bi-person"></i>
                 {{ activity.user.first_name }}
             </span>
             
             {% if activity.action == 'Requester_Request_Translation_to_LLM' %}
-                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
-                <samp>Id: {{ activity.translation_request_id }}.</samp>
-                <samp>Details: {{ activity.additional_info }}.</samp>
+                <span class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"> </i>{{ activity.action }}</span>
+                <span class="badge text-bg-info rounded-pill">({{ activity.translation_request_id }})</span>
+                <br><samp>Details: {{ activity.additional_info }}.</samp>
             {%endif%}
             
+            {% if activity.action == 'Translation_Received_from_LLM' %}
+                <span class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"> </i>{{ activity.action }}</span>
+                <span class="badge text-bg-info rounded-pill">({{ activity.translation_request_id }})</span>
+                <br><samp>Details: {{ activity.additional_info }}.</samp>
+            {%endif%}
+
             {% if activity.action == 'Requester_Requests_Business_Review' %}
-                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
-                <samp>Id: {{ activity.review_request_id }} was created.</samp>
-                <samp>Details: {{ activity.additional_info }}.</samp>
+                <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-1-circle"> </i>{{ activity.action }}</span>
+                <span class="badge text-bg-info rounded-pill">({{ activity.review_request_id }})</span>
+                <br><samp>Details: {{ activity.additional_info }}.</samp>
             {%endif%}
             
             {% if activity.action == 'Reviewer_Visualizes_Request' %}
-                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
-                <samp>Id: {{ activity.review_request_id }} was visualized.</samp>
+                <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-2-circle"> </i>{{ activity.action }}</span>
+                <span class="badge text-bg-info rounded-pill">({{ activity.review_request_id }})</span>
             {%endif%}
             
             {% if activity.action == 'Reviewer_Saves_Custom_Translations' %}
-                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
-                <samp>Id: {{ activity.review_request_id }} was modified.</samp>
-                <samp>Details: {{ activity.additional_info }}.</samp>
+                <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-3-circle"> </i>{{ activity.action }}</span>
+                <span class="badge text-bg-info rounded-pill">({{ activity.review_request_id }})</span>
+                <br><samp>Details: {{ activity.additional_info }}.</samp>
             {%endif%}
 
             {% if activity.action == 'Requester_Downloaded_Review' %}
-                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
+                <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-4-circle"> </i>{{ activity.action }}</span>
+                <span class="badge text-bg-info rounded-pill">({{ activity.review_request_id }})</span>
                 <samp>File reviewed for request: {{ activity.review_request_id }} was downloaded.</samp>
-                <samp>Details: {{ activity.additional_info }}.</samp>
+                <br><samp>Details: {{ activity.additional_info }}.</samp>
             {%endif%}
 
-            {% if activity.action == 'Translation_Received_from_LLM' %}
-                <span class="badge text-bg-dark rounded-pill">{{ activity.action }}</span>
-                <samp>Details: {{ activity.additional_info }}.</samp>
-            {%endif%}
         </li>
     </ul>
     {% endfor %}
