@@ -1,0 +1,48 @@
+{% extends 'base_template.html' %}
+
+{% block additional_js%}
+<script>
+    $('textarea').each(function () {
+        this.style.height = this.scrollHeight+5 + 'px'; // Set initial height
+    }).on('input', function () {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+</script>
+{% endblock %}
+
+{% block title %}
+{% endblock %}
+
+{% block body %}
+<h1><i class="bi bi-robot"></i>Custom Instructions for AI Translations</h1>
+
+<a style="margin-top: 15px" href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+
+<table class="table mt-4">
+    <thead>
+        <tr>
+            <th scope="col">Language</th>
+            <th scope="col">Instructions</th>
+            <th scope="col">Last Modified By</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for instruction in custom_instructions %}
+        <tr>
+            <td style="width: 10%"><i class="bi bi-globe-americas"></i> {{ instruction.language.name }}</td>
+            <td style="width: 75%">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="instruction_id" value="{{ instruction.id }}">
+                    <textarea name="instructions_modified" rows="2" class="form-control">{{ instruction.instructions }}</textarea>
+                    <button type="submit" class="btn btn-primary mt-2">Save</button>
+                </form>
+            </td>
+            <td>{{ instruction.user_last_modification.first_name }} {{ instruction.user_last_modification.last_name }} ({{ instruction.date_last_modification }})</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 from django.http import FileResponse, HttpResponse
 from django.contrib.auth import logout
 
-from .models import Languages, TranslationsRequests, Translations_Units, ReviewRequests, LogDiary
+from .models import Languages, TranslationsRequests, Translations_Units, ReviewRequests, LogDiary, CustomInstructions
 
 from .forms.translation_form import TranslationForm
 from .forms.language_selection_form import LanguageSelectionForm
@@ -25,13 +25,20 @@ from postmarker.core import PostmarkClient
 ROOT_FOLDER = "translations_requests"
 SEND_EMAILS = False
 
+def userpage(request):
+     
+    return render(request, 'xliff_manager/userpage.html')
+
 def home(request):
-    current_user = request.user
-    pending_requests_count = ReviewRequests.objects.filter(business_user=current_user, status='Requested').count()
-    context = {
-        'pending_requests_count': pending_requests_count,
-    }
-    return render(request, 'xliff_manager/home.html', context)
+    if not request.user.is_authenticated:
+        return redirect('login')
+    else:
+        current_user = request.user
+        pending_requests_count = ReviewRequests.objects.filter(business_user=current_user, status='Requested').count()
+        context = {
+            'pending_requests_count': pending_requests_count,
+        }
+        return render(request, 'xliff_manager/home.html', context)
 
 def login_view(request):
     if request.method == 'POST':
@@ -427,6 +434,32 @@ def diary_log_view(request):
 @login_required
 def load_translations(request):
     return render(request, '/')
+
+@login_required
+def custom_instructions_view(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        custom_instructions = []
+        
+        instruction_id = request.POST["instruction_id"]
+        instruction_text = request.POST["instructions_modified"]
+        custom_instruction = CustomInstructions.objects.get(id=instruction_id)
+        custom_instruction.instructions = instruction_text
+        custom_instruction.user_last_modification = request.user
+        custom_instruction.save()
+
+        # Log the action in the LogDiary
+        LogDiary.objects.create(
+            user=request.user,
+            action="Reviewer_Saves_Custom_Translations",
+            additional_info=f"Custom instruction {instruction_id} modified to: {instruction_text}",
+        )
+        
+        return render(request, 'xliff_manager/custom_instructions_confirmation.html', {'num_records': len(custom_instructions)})
+
+    else:
+        custom_instructions = CustomInstructions.objects.all().order_by('language__name')
+        return render(request, 'xliff_manager/custom_instructions.html', {'custom_instructions': custom_instructions})
 
 def confirm_insertion_view(request, num_records):
     return render(request, 'xliff_manager/confirm_insertion.html', {'num_records': num_records})

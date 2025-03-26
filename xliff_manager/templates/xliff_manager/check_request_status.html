@@ -2,9 +2,9 @@
 
 {% block body %}
 <body>
-    <div class="container mt-5">
+    <div class="container mb-4">
 
-        <h1 class="mb-4">Current Status of all Requests</h1>
+        <h1 class="mb-4"><i class="bi bi-journal-text"></i>Current Status of all Requests</h1>
         <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
         <a href="{% url 'request_translation' %}" class="btn  btn-primary">Request a new AI Translation</a>
         <a href="{% url 'request_review' %}" class="btn  btn-primary">Request Business Review</a>
@@ -16,7 +16,7 @@
             </ul>
         </div>
 
-        <h2  style="margin-top: 30px">AI translations requests</h5>
+        <h2  style="margin-top: 30px">AI translations Requests</h5>
             <table class="table mt-3 table-sm" >
                 <thead>
                     <tr class="text-center">
@@ -35,7 +35,7 @@
                     <tr class="text-center">
                         <td scope="row">{{ request.id }}</td>
                         <td>{{ request.language.name }}</td>
-                        <td>{{ request.request_user.username }}</td>
+                        <td>{{ request.request_user.first_name }} {{ request.request_user.last_name }}</td>
                         <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td> 
                         <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
                         <td>{{ request.date_received_from_llm|date:"Y/m/d H:i" }}</td>
@@ -52,13 +52,12 @@
                 </tbody>
             </table>
 
-        <h2 style="margin-top: 50px"> Business Review Requests</h5>
+        <h2 style="margin-top: 50px"> Reviews requested to Business Experts</h5>
         <table class="table mt-3 table-sm" >
             <thead>
                 <tr class="text-center">
                     <th scope="col">Request Id</th>
-                    <th scope="col">Requester</th>
-                    <th scope="col">Reviewer</th>
+                    <th scope="col">Requester to Reviewer</th>
                     <th scope="col">Status</th>
                     <th scope="col">Date Created</th>
                     <th scope="col"><i class="bi bi-tag"></i>Tag</th>
@@ -72,12 +71,13 @@
             <tbody class="table-group-divider">
                 {% for request in review_requests %}
                 <tr class="text-center">
-                    <td scope="row">{{ request.id }}</td>
-                    <td>{{ request.technical_user.username }}</td>
-                    <td>{{ request.business_user.username }}</td>
+                    <td style="width:2%" scope="row">{{ request.id }}</td>
+                    <td style="font-size: smaller;">{{ request.technical_user.first_name }} {{ request.technical_user.last_name }} 
+                        <i class="bi bi-arrow-right-square-fill" style="color:#ffc107;"></i>
+                        {{ request.business_user.first_name }} {{ request.business_user.last_name }}</td>
                     <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td> 
-                    <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
-                    <td>{{ request.info_tag|default_if_none:"-" }}</td>
+                    <td>{{ request.date_created|date:"Y/m/d" }}</td>
+                    <td style="font-size: smaller;">{{ request.info_tag|default_if_none:"-" }}</td>
                     <td>{{ request.date_reviewed_by_business|date:"Y/m/d H:i" }}</td>
                     <td>
                         {% if request.requester_comment is not None %}
@@ -100,11 +100,11 @@
                     <td>
                         <a href="{% url 'download_file' type='review_request_source_file' id=request.id file_to_download=request.target_xliff_file %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
                     </td>
-                    <td>
+                    <td style="font-size: smaller;">
                         {% if request.status == 'Reviewed' %}
                             <a href="{% url 'download_file' type='review_request_target_file' id=request.id file_to_download=request.target_xliff_file %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
                         {% else %}
-                            Not in Reviewed Status
+                            Not Reviewed yet
                         {% endif %}    
                     </td>
                     </tr>

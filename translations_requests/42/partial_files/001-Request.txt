@@ -9,7 +9,7 @@ Each <trans-unit> instance will contain the following elements:
 - source: the original text to be translated.
 - target: an example of a translated value into another language.
 
-Your task is to provide the same list of <trans-units> but in the <target> node you must provide the translation of the text in the <source> node into Italian.
+Your task is to provide the same list of <trans-units> but in the <target> node you must provide the translation of the text in the <source> node into French.
 For example, for the following <trans-unit> element:
 <trans-unit id="CustomLabel.Text" maxwidth="240">
 <source>Advanced Editor</source>
@@ -19,10 +19,10 @@ For example, for the following <trans-unit> element:
 The expected answer from you is:
 <trans-unit id="CustomLabel.Text" maxwidth="240">
 <source>Advanced Editor</source>
-<target></target> <-- THIS TARGET NODE SHOULD CONTAIN THE TRANSLATION TO Italian of the <source> node.
+<target></target> <-- THIS TARGET NODE SHOULD CONTAIN THE TRANSLATION TO French of the <source> node.
 </trans-unit>
 
-So, the only change expected in every <trans-unit> is the <target> node, with will contain translation of the source text into Italian.
+So, the only change expected in every <trans-unit> is the <target> node, with will contain translation of the source text into French.
 
 Follow these guidelines:
 - Do not add any header and neither number the lines.
@@ -36,7 +36,7 @@ Follow these guidelines:
 - Translate all <trans-unit> elements without omitting any.
 
 Also, when translating consider the following particularities:
-{'- "Any restrictions" as "Eventuali restrizioni"', 'Do not translate the following words:', '- Template', '- Envelope', '- Person_0', '- Conga', '- 1PSP', 'For the following words do the translations as indicate', '- "sort order" as "Ordinamento".', '- CareProgramEnrollee Id', '- Report'}
+
 
 -----------
 This is the list of sequence of <trans-unit> sequence:

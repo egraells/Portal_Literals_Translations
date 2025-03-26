@@ -88,7 +88,7 @@ class ReviewRequests(models.Model):
     status = models.CharField(max_length=100, default='Requested') # Requested, Reviewed, Declined, Downloaded
 
 class Translations_Units(models.Model):
-    id= models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     request = models.ForeignKey('ReviewRequests', on_delete=models.CASCADE)
     salesforce_id = models.TextField()
     reviewer_comment = models.TextField(null=True, blank=True)
@@ -137,7 +137,7 @@ class LogDiary(models.Model):
             case "Reviewer_Visualizes_Request":
                 self.description = f"Review visualized (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
             case "Reviewer_Saves_Custom_Translations":
-                self.description = f"Translations saved (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
+                self.description = f"Translations saved {self.user} at {self.date} - Info: {self.additional_info}"
             case "Reviewer_Declines_Request":
                 self.description = f"Review declined (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
             case "Reviewer_Mark_as_Reviewed_Request":
@@ -148,3 +148,18 @@ class LogDiary(models.Model):
                 self.description = f"Unknown action: {self.action} at {self.date} - Info: {self.additional_info}"
         
         super().save(*args, **kwargs)
+
+class CustomInstructions(models.Model):
+    
+    id = models.AutoField(primary_key=True)
+    user_last_modification = models.ForeignKey(User, on_delete=models.CASCADE)
+    language = models.ForeignKey('Languages', on_delete=models.CASCADE)
+    instructions = models.TextField(null=True, blank=True)
+    date_last_modification = models.DateTimeField(auto_now=True)
+
+    class Meta: 
+        ordering = ['-date_last_modification']
+        #indexes = [ models.Index(fields=['-publish']), ]  
+
+    def __str__(self):
+        return f"Custom instructions for {self.language} by {self.user_last_modification} in {self.date_last_modification}: {self.instructions}"   

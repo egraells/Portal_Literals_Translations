@@ -1,0 +1,15 @@
+{% extends 'base_template.html' %}
+
+
+
+{% block body %}
+<h2><i class="bi bi-person-vcard"></i>  Your Details</h2>
+<ul>
+    <li>Username: {{ user.username }}</li>
+    <li>Email: {{ user.email }}</li>
+    <li>First Name: {{ user.first_name }}</li>
+    <li>Last Name: {{ user.last_name }}</li>
+</ul>
+    <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+    <a href="{% url 'password_reset' %}" class="btn btn-primary">Reset Password</a>
+{% endblock %}
