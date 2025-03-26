@@ -160,15 +160,17 @@ def do_review_view(request, request_id):
             
             request_declined = ReviewRequests.objects.get(id=request_id)
 
+            """"
             send_email(recipient=request_reviewed.technical_user.email,
             subject='Request Declined',
             body=f'The user has declined the request id: {request_declined.id} with the justification: {request_declined.decline_justification}')
-
+            """
 
             return render(request, 'xliff_manager/review_business_decline.html', 
                 {'request': request_declined,
                  'user_confirmed' : True})
         
+        request_done = None
         if action == "mark_as_reviewed":
             request_done = ReviewRequests.objects.get(id=request_id)
             return render(request, 'xliff_manager/review_business_done.html',
@@ -177,22 +179,23 @@ def do_review_view(request, request_id):
 
         if action == "mark_as_reviewed_confirmation":
             request_reviewed = ReviewRequests.objects.get(id=request_id)
-            request_reviewed.update(
-                status = 'Reviewed',
-                reviewer_comment = request.POST.get('reviwer_comment', ''),
-                date_reviewed_by_business = timezone.now()
-            )
+            request_reviewed.status = 'Reviewed'
+            request_reviewed.reviewer_comment = request.POST.get('reviwer_comment', '')
+            request_reviewed.date_reviewed_by_business = timezone.now()
+            request_reviewed.save()
 
             LogDiary.objects.create(
                     user=request.user,
-                    action="Reviewer_Mark_as_Reviewed_Request",
+                    action="Custom_Instrucions_Modified",
                     review_request_id=f"{request_id}",
                     additional_info=f"",
             )
 
+            """
             send_email(recipient=request_reviewed.technical_user.email,
                         subject='Request Reviewed',
                         body=f'The user has reviewed the request id: {request_reviewed.id}')
+            """
 
             return render(request, 'xliff_manager/review_business_done.html',
                 {'request': request_done,
@@ -206,7 +209,7 @@ def request_translation_view(request):
         start_new = request.GET.get('start_new')
         lang_select_form = LanguageSelectionForm()
         
-        return render(request, 'xliff_manager/request_translation.html', 
+        return render(request, 'xliff_manager/request_llm_translation.html', 
             {'lang_select_form': lang_select_form,
             'selected_lang_id': 0, 
             'selected_lang_name' : 'None'}
@@ -217,7 +220,7 @@ def request_translation_view(request):
 
         if action == 'language_reset':
             lang_select_form = LanguageSelectionForm()
-            return render(request, 'xliff_manager/request_translation.html', 
+            return render(request, 'xliff_manager/request_llm_translation.html', 
                 {'lang_select_form': lang_select_form,
                 'selected_lang_id': 0, 
                 'selected_lang_name' : 'None'}
@@ -228,12 +231,12 @@ def request_translation_view(request):
             if lang_selected != 0:
                 lang = Languages.objects.get(id=lang_selected)
                 request_translation_form = TranslationForm()
-                return render(request, 'xliff_manager/request_translation.html', 
+                return render(request, 'xliff_manager/request_llm_translation.html', 
                     {'req_trans_form': request_translation_form,
                     'selected_lang_id': lang.id, 
                     'selected_lang_name' : lang.name.title() })
             else:
-                return render(request, 'xliff_manager/request_translation.html', 
+                return render(request, 'xliff_manager/request_llm_translation.html', 
                     {'selected_lang_id': 0, 'selected_lang_name' : 'None'})
 
         if action == 'translate_xliff':
@@ -252,7 +255,6 @@ def request_translation_view(request):
                     request_user = request.user,
                     source_xliff_file = request.FILES['xliff_source_file'],
                     target_xliff_file_name = request.FILES['xliff_source_file'].name + '_translated.xlf',
-                    prompt_addition_file = request.FILES['prompt_addition_file'] if 'prompt_addition_file' in request.FILES else None,
                     literals_to_exclude_file = request.FILES['literal_ids_to_exclude_file'] if 'literal_ids_to_exclude_file' in request.FILES else None,
                     literalpatterns_to_exclude_file = request.FILES['literal_patterns_to_exclude_file'] if 'literal_patterns_to_exclude_file' in request.FILES else None,
                 )
@@ -266,11 +268,6 @@ def request_translation_view(request):
                 shutil.move(trans_request.source_xliff_file.name, os.path.join(dest_folder, source_xliff_file_only_name))
                 trans_request.source_xliff_file = source_xliff_file_only_name
                 
-                if trans_request.prompt_addition_file:
-                    prompt_addition_file_only = os.path.basename(trans_request.prompt_addition_file.name)
-                    shutil.move(os.path.join(ROOT_FOLDER, prompt_addition_file_only), 
-                                os.path.join(dest_folder, prompt_addition_file_only))
-                    trans_request.prompt_addition_file = prompt_addition_file_only
                 
                 if trans_request.literals_to_exclude_file:
                     exclude_file_name_only = os.path.basename(trans_request.literals_to_exclude_file.name)
@@ -291,7 +288,6 @@ def request_translation_view(request):
                     action="Requester_Request_Translation_to_LLM",
                     translation_request_id=f"{trans_request.id}",
                     additional_info=f"xliff file:{source_xliff_file_only_name}, \
-                        additional_prompt file:{trans_request.prompt_addition_file.name}, \
                         exclude_literals file:{trans_request.literals_to_exclude_file.name}, \
                         exclude_patterns file:{trans_request.literalpatterns_to_exclude_file.name}",
                 )
@@ -302,7 +298,7 @@ def request_translation_view(request):
                 print(request_translation_form.errors)
                 return HttpResponse('Error! Segurament algun fitxer és buit')
     else:
-        return render(request, 'xliff_manager/request_translation.html', 
+        return render(request, 'xliff_manager/request_llm_translation.html', 
             {'selected_language': 0})
 
 @login_required
@@ -464,16 +460,4 @@ def custom_instructions_view(request):
 def confirm_insertion_view(request, num_records):
     return render(request, 'xliff_manager/confirm_insertion.html', {'num_records': num_records})
 
-@login_required
-def execute_translation_request(req_transl_pk):
-
-    # Retrieve the record and get the content files in text and call aitranslator
-    trans_request = TranslationsRequests.objects.get(pk=req_transl_pk)
-    
-    xliff_content = trans_request.xliff_file.read().decode('utf-8')
-    prompt_addition_content = trans_request.prompt_addition_file.read().decode('utf-8') if trans_request.prompt_addition_file else ''
-    excluded_literals_content = trans_request.literals_to_exclude_file.read().decode('utf-8') if trans_request.literals_to_exclude_file else ''
-    exclusion_patterns_content = trans_request.literalpatterns_to_exclude_file.read().decode('utf-8') if trans_request.literalpatterns_to_exclude_file else ''
-    language_iso_value = trans_request.language_id
-    language_iso_txt = Language.objects.get(id=language_iso_value).iso_value
 

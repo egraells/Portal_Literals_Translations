@@ -16,6 +16,7 @@ db.sqlite3
 
 # VS Code ignores
 .vscode/
+.vscode
 
 # Celery ignores (if you use Celery)
 celerybeat.pid
@@ -28,4 +29,7 @@ Thumbs.db
 Thumbs.db:encryptable
 *.swp
 *.swo
-.vscode
+
+# XLIFF files
+*.xlf
+translations_requests/**

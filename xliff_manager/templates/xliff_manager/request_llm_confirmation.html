@@ -16,18 +16,17 @@
                         <li><b>Target Language</b>: {{ trans_request.language}}</li>
                         <li><b>Source file received (and renamed)</b>: {{ trans_request.source_xliff_file}}</li>
                         <li><b>Target file that will be generated</b>: {{ trans_request.target_xliff_file}}</li>
-                        <li><b>File with the addition prompt instructions received:</b> {{ trans_request.prompt_addition_file}}</li>
                         <li><b>File with Literals to be excluded received:</b> {{ trans_request.literals_to_exclude_file}}</li>
                         <li><b>File with Patterns to exclude received: </b>{{ trans_request.literalpatterns_to_exclude_file}}</li>
                     </ul>
                     <p>🗂️ The request has been transfered to the AI engine to generate the translation.</p>
                     <p>📩 Once the translation are ready, you will receive an email with the download link.</p>
+                    <p>🤖 Remember that, if custom instructions exist for this language, the LLM will use them.</p>
                 </div>
             </div>
         </div>
     </div>   
     {% endif %}
-
 
     <div class="row">
         <div class="col-md-12">

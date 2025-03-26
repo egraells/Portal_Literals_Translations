@@ -58,14 +58,6 @@
                             {{ req_trans_form.xliff_source_file.errors}}
                         </div>
                         <div class="mb-3">
-                            <h6>Additional prompt instructions</h6>
-                            <label for="{{ req_trans_form.prompt_addition_file.id_for_label }}" class="form-label">
-                                {{ req_trans_form.prompt_addition.label }}
-                            </label>
-                            {{ req_trans_form.prompt_addition_file }}
-                            {{ req_trans_form.prompt_addition_file.errors}}
-                        </div>
-                        <div class="mb-3">
                             <h6>File with literals to be excluded</h6>
                             <label for="{{ req_trans_form.literal_ids_to_exclude_file.id_for_label }}" class="form-label">
                                 {{ req_trans_form.literal_ids_to_exclude_file.label }}
