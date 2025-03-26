@@ -5,9 +5,9 @@
 {% block body %}
     <div class="p-3">
         {% if user.is_authenticated %}
-            {% if request.user.is_superuser %}
+            {% if user.is_superuser %}
             <h2 style="margin-top:15px">
-                <i class="bi bi-wrench-adjustable-circle" style="font-size: 2rem; color: #0d6efd;margin-right: 5px"></i>
+                <i class="bi bi-wrench-adjustable-circle"></i>
                 Admin Section
             </h2>
             <div class="card-group" style="margin-bottom: 30px">
@@ -15,7 +15,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Admin Tasks</h5>
                         <p class="card-text">Manage administrative tasks such as user management and group assignments.</p>
-                        <a href="/admin" class="btn btn-primary">Go to Admin Panel</a>
+                        <a href="/admin" class="btn btn-primary">Go to Admin Panel</a>  
                     </div>
                     <div class="card-footer">
                         <small class="text-body-secondary">Current tasks include managing users and assigning them to groups.</small>
@@ -24,14 +24,11 @@
             </div>
             {% endif %}
             
-            {% if "Requester" in request.user.groups.all|join:", " %}
-            <h2 style="margin-top: 15px">
-                <i class="bi bi-filetype-xml" style="font-size: 2rem; color: #0d6efd;margin-right: 5px"></i>
-            </h2>
+            {% if "Requester" in user.groups.all|join:", " %}
             <div class="card-group" style="margin-bottom: 30px">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Check Request Status</h5>
+                        <h5 class="card-title"><i class="bi bi-filetype-xml"></i> Check Request Status</h5>
                         <p class="card-text">Monitor the status of AI and Business review requests.</p>
                         <a href="{% url 'check_request_status' %}" class="btn btn-primary">Check requests status</a>
                     </div>
@@ -42,7 +39,7 @@
                 
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Request an AI Translation</h5>
+                        <h5 class="card-title"><i class="bi bi-filetype-xml"></i> Request an AI Translation</h5>
                         <p class="card-text">Submit an XLIFF file extracted from Salesforce for translation to the AI engine.</p>
                         <a href="{% url 'request_translation' %}" class="btn btn-primary">Request an AI Translation</a>
                     </div>
@@ -53,7 +50,7 @@
                 
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Request a Business Review</h5>
+                        <h5 class="card-title"><i class="bi bi-filetype-xml"></i> Request a Business Review</h5>
                         <p class="card-text">Submit an AI-translated and previously reviewed by the team to business for review.</p>
                         <a href="{% url 'request_review' %}" class="btn btn-primary">Request a Business Review</a>
                     </div>
@@ -64,14 +61,11 @@
             </div>
             {% endif %}
 
-            {% if "Reviewer" in request.user.groups.all|join:", " %}
-            <h2 style="margin-top: 15px">
-                <i class="bi bi-briefcase" style="font-size: 2rem; color: #0d6efd;margin-right: 5px"></i>
-            </h2>
+            {% if "Reviewer" in user.groups.all|join:", " %}
             <div class="card-group" style="margin-bottom: 30px">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Reviews</h5>
+                        <h5 class="card-title"><i class="bi bi-card-checklist"></i> User Reviews</h5>
                         <p class="card-text">Reviews that are pending for you to provide feedback based on professional vocabulary and expressions that better suits the project.</p>
                         <a href="{% url 'choose_review_view' %}" class="btn btn-primary">Check my Reviews</a>
                     </div>
@@ -86,15 +80,13 @@
             </div>
             {% endif %}
 
-            <h2 style="margin-top: 15px">
-                <i class="bi bi-journal-bookmark" style="font-size: 2rem; color: #0d6efd;margin-right: 5px"></i>
-            </h2>
+
             <div class="card-group" style="margin-bottom: 15px">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Custom AI Translation Instructions (Not Available Yet)</h5>
+                        <h5 class="card-title"><i class="bi bi-journal-bookmark" user></i> Custom AI Translation Instructions</h5>
                         <p class="card-text">Provide specific instructions to guide the AI in translating texts according to your preferences and criteria.</p>
-                        <a href="{% url 'choose_review_view' %}" class="btn btn-primary">Custom Instructions</a>
+                        <a href="{% url 'custom_instructions' %}" class="btn btn-primary">Custom Instructions</a>
                     </div>
                     <div class="card-footer">
                         <small class="text-body-secondary">Instructions are managed by language, not per request or user.</small>
@@ -102,13 +94,10 @@
                 </div>
             </div>
 
-            <h2 style="margin-top: 15px">
-                <i class="bi bi-calendar-date" style="font-size: 2rem; color: #0d6efd;margin-right: 5px"></i>
-            </h2>
             <div class="card-group" style="margin-bottom: 15px">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Activity Log </h5>
+                        <h5 class="card-title"><i class="bi bi-calendar-date" user></i> Activity Log </h5>
                         <p class="card-text">Review the Full log of activity, for your requests to the AI engine and to reviewers and their answers.    </p>
                         <a href="{% url 'diary_log' %}" class="btn btn-primary">See the Full log</a>
                     </div>

@@ -1,0 +1,15 @@
+{% extends 'base_template.html' %}
+
+{% block body %}
+
+<h1 class="mb-4">Your Custom instructions have been succesfully registered</h1>
+<a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+<a href="{% url 'choose_review_view' %}" class="btn btn-primary">Pending Reviews</a>
+<a href="{% url 'diary_log' %}" class="btn btn-primary">Requests Status Log</a>
+
+
+<div class="alert alert-success" role="alert" style="margin-top: 20px;">
+    <p>These new instructions will be used by the AI Engine the next time a translation is requested.</p>
+</div>
+
+{% endblock %}
