@@ -23,12 +23,21 @@
         <thead>
             <tr class="text-center">
                 <th scope="col">Action</th>
-                <th scope="col">Request Id</th>
+                <th scope="col" style="width:1%">Request Id</th>
+                <th scope="col">Language</th>
                 <th scope="col">Requester</th>
                 <th scope="col">Reviewer</th>
                 <th scope="col">Status</th>
-                <th scope="col">Date Created</th>
-                <th scope="col">Last Date Reviewed</th>
+                <th scope="col" style="width:1%">Requested Date</th>
+                <th scope="col" style="width:1%">
+                    <button type="button" class="btn"
+                        style="padding:0px"
+                        data-bs-toggle="tooltip" data-bs-placement="top"
+                        data-bs-custom-class="custom-tooltip"
+                        data-bs-title="Remember that a Reviewer can review several times.">
+                        <i class="bi bi-info-circle"></i>
+                    </button> Last Date Reviewed
+                </th>
                 <th scope="col">Requester </th>
                 <th scope="col">Reviewer Comments</th>
                 <th scope="col">File uploaded</th>
@@ -61,8 +70,9 @@
                         <input type="hidden" name="request_selected_id" value="{{ request.id }}">
                     </td>
                     <td>{{ request.id }}</td>
-                    <td>{{ request.technical_user.username }}</td>
-                    <td>{{ request.business_user.username }}</td>
+                    <td>{{ request.language.name }}</td>
+                    <td>{{ request.technical_user.first_name }}</td>
+                    <td>{{ request.business_user.first_name }}</td>
                     {% if request.status == 'Declined' %}
                         <td><span class="badge rounded-pill text-bg-danger">{{ request.status }}</span></td>
                     {% elif request.status == 'Reviewed' %}
@@ -70,8 +80,8 @@
                     {% else %}
                         <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td>
                     {% endif %} 
-                    <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
-                    <td>{{ request.date_reviewed_by_business|date:"Y/m/d H:i" }}</td>
+                    <td>{{ request.date_created|date:"Y/m/d" }}</td>
+                    <td>{{ request.date_reviewed_by_business|date:"Y/m/d" }}</td>
                     <td>
                         {% if request.requester_comment is not None %}
                             <button type="button" class="btn btn-sm btn-light" 

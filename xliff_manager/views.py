@@ -20,6 +20,7 @@ from .forms.translation_form import TranslationForm
 from .forms.language_selection_form import LanguageSelectionForm
 
 from postmarker.core import PostmarkClient
+from django.db.models import Q, F
 
 
 ROOT_FOLDER = "translations_requests"
@@ -129,9 +130,8 @@ def do_review_view(request, request_id):
                 # Log the action in the LogDiary
                 LogDiary.objects.create(
                     user=request.user,
-                    action="Reviewer_Saves_Custom_Translations",
+                    action="Saved_Custom_Translations",
                     review_request_id = request_id,
-                    additional_info=f"{len(trans_units_to_update)} translations saved",
                 )
             
             return render(request, 'xliff_manager/review_business_confirmation.html', 
@@ -186,9 +186,8 @@ def do_review_view(request, request_id):
 
             LogDiary.objects.create(
                     user=request.user,
-                    action="Custom_Instrucions_Modified",
+                    action="Review_Marked_as_Reviewed",
                     review_request_id=f"{request_id}",
-                    additional_info=f"",
             )
 
             """
@@ -287,9 +286,6 @@ def request_translation_view(request):
                     user=request.user,
                     action="Requester_Request_Translation_to_LLM",
                     translation_request_id=f"{trans_request.id}",
-                    additional_info=f"xliff file:{source_xliff_file_only_name}, \
-                        exclude_literals file:{trans_request.literals_to_exclude_file.name}, \
-                        exclude_patterns file:{trans_request.literalpatterns_to_exclude_file.name}",
                 )
 
                 return render(request, 'xliff_manager/request_llm_confirmation.html', 
@@ -318,7 +314,6 @@ def choose_review_view(request):
                 user=request.user,
                 action="Reviewer_Visualizes_Request",
                 review_request_id=request_selected_id,
-                additional_info=f"",
             )
             
             return redirect('do_request_review', request_id=request_selected_id)
@@ -341,6 +336,7 @@ def request_review_view(request):
         users = User.objects.values('id', 'first_name', 'last_name')
         return render(request, 'xliff_manager/request_review.html',
             {'users': users,
+             'languages': Languages.objects.all(),
              'tags_used': tags_used})
                            
     if request.method == 'POST':
@@ -349,6 +345,8 @@ def request_review_view(request):
         if action == 'request_business_review':
 
             if request.FILES['xliff_translations_file'] and request.POST.get('business_reviewer'):
+                language_selected = request.POST.get('language')
+                language_id = Languages.objects.get(id=language_selected).id
                 uploaded_xliff_file = request.FILES['xliff_translations_file']
                 original_xliff_file_name = uploaded_xliff_file.name
                 business_reviewer = request.POST.get('business_reviewer')
@@ -357,6 +355,7 @@ def request_review_view(request):
                 tag = request.POST.get('tag')
 
                 review_request = ReviewRequests(
+                    language_id = language_id,
                     technical_user = request.user,
                     business_user = reviewer,
                     target_xliff_file = uploaded_xliff_file,
@@ -381,6 +380,7 @@ def request_review_view(request):
                 for unit in trans_units:
                     Translations_Units.objects.create(
                         request_id = review_request.id,
+                        language_id = language_id,
                         salesforce_id = unit['id'], 
                         source = unit['source'],
                         ai_translation = unit['target'],
@@ -394,16 +394,13 @@ def request_review_view(request):
                     user=request.user,
                     action="Requester_Requests_Business_Review",
                     review_request_id=f"{review_request.id}",
-                    additional_info=f"{Translations_Units.objects.filter(request=review_request.id).count()} translations in total \
-                        with tag: \"{review_request.info_tag if review_request.info_tag else '-'}\" \
-                        to {review_request.business_user.first_name} {review_request.business_user.last_name} \
-                        with the comment: \"{requester_comment if requester_comment else '-'}\"",
                 )
 
                 # return HttpResponse(f"File uploaded successfully: {uploaded_xliff_file}, Release: {new_release}")
                 return render(request, 'xliff_manager/review_request_confirmation.html', 
                     {
                         'request_id' : review_request.id,
+                        'language': review_request.language.name,
                         'reviewer' : reviewer.first_name + " " + reviewer.last_name,
                         'num_records' : len (trans_units),
                         'business_reviewer' : reviewer.first_name + " " + reviewer.last_name
@@ -433,6 +430,28 @@ def load_translations(request):
 
 @login_required
 def custom_instructions_view(request):
+    
+    if request.method == 'GET':
+        custom_instructions = CustomInstructions.objects.all().order_by('language__name')
+        translations_adjusted_by_reviewers = []
+        translations_with_differences = Translations_Units.objects.exclude(reviewer_translation__exact='').order_by('-date_reviewed')
+        for translation in translations_with_differences:
+            if translation.ai_translation is not None:
+                translation.reviewer_translation = translation.reviewer_translation.strip()
+                translation.reviewer_translation = translation.reviewer_translation.replace('\r', '').replace('\n', '')
+            
+            if translation.ai_translation is not None:
+                translation.ai_translation = translation.ai_translation.strip()
+                translation.ai_translation = translation.ai_translation.replace('\r', '').replace('\n', '')
+            
+            if translation.ai_translation != translation.reviewer_translation:
+                translations_adjusted_by_reviewers.append(translation)
+
+        return render(request, 'xliff_manager/custom_instructions.html', {
+            'custom_instructions': custom_instructions,
+            'translations_adjusted_by_reviewers': translations_adjusted_by_reviewers
+        })
+
     if request.method == 'POST':
         action = request.POST.get('action')
         custom_instructions = []
@@ -447,15 +466,11 @@ def custom_instructions_view(request):
         # Log the action in the LogDiary
         LogDiary.objects.create(
             user=request.user,
-            action="Reviewer_Saves_Custom_Translations",
-            additional_info=f"Custom instruction {instruction_id} modified to: {instruction_text}",
+            action="Saved_Custom_Translations",
         )
         
         return render(request, 'xliff_manager/custom_instructions_confirmation.html', {'num_records': len(custom_instructions)})
 
-    else:
-        custom_instructions = CustomInstructions.objects.all().order_by('language__name')
-        return render(request, 'xliff_manager/custom_instructions.html', {'custom_instructions': custom_instructions})
 
 def confirm_insertion_view(request, num_records):
     return render(request, 'xliff_manager/confirm_insertion.html', {'num_records': num_records})

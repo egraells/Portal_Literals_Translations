@@ -28,17 +28,6 @@
             <div class="card-group" style="margin-bottom: 30px">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-filetype-xml"></i> Check Request Status</h5>
-                        <p class="card-text">Monitor the status of AI and Business review requests.</p>
-                        <a href="{% url 'check_request_status' %}" class="btn btn-primary">Check requests status</a>
-                    </div>
-                    <div class="card-footer">
-                        <small class="text-body-secondary">You can check both AI and business review requests.</small>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
                         <h5 class="card-title"><i class="bi bi-filetype-xml"></i> Request an AI Translation</h5>
                         <p class="card-text">Submit an XLIFF file extracted from Salesforce for translation to the AI engine.</p>
                         <a href="{% url 'request_translation' %}" class="btn btn-primary">Request an AI Translation</a>
@@ -56,6 +45,16 @@
                     </div>
                     <div class="card-footer">
                         <small class="text-body-secondary">An XLIFF file is required.</small>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-filetype-xml"></i> Check Request Status for AI and Business Review</h5>
+                        <p class="card-text">Monitor the status of AI and Business reviews.</p>
+                        <a href="{% url 'check_request_status' %}" class="btn btn-primary">Check AI & Business requests</a>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-body-secondary">You can check both AI and business review requests.</small>
                     </div>
                 </div>
             </div>

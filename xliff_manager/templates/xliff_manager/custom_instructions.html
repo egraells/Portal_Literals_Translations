@@ -36,10 +36,45 @@
                     {% csrf_token %}
                     <input type="hidden" name="instruction_id" value="{{ instruction.id }}">
                     <textarea name="instructions_modified" rows="2" class="form-control">{{ instruction.instructions }}</textarea>
-                    <button type="submit" class="btn btn-primary mt-2">Save</button>
+                    <button type="submit" class="btn btn-primary mt-2">Save changes</button>
                 </form>
             </td>
             <td>{{ instruction.user_last_modification.first_name }} {{ instruction.user_last_modification.last_name }} ({{ instruction.date_last_modification }})</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Adjustments made by Reviewers</h2>
+<p>The following is a list of the translations provided by any reviewer in your language assigned.</br>
+The AI translation is the original translation provided by the AI, and the Reviewer Adjustment is the translation provided by the reviewer.</br>
+<p><i class="bi bi-gear-wide-connected"></i><b> This can be helpful to tailor appropiately the custom instructions to provide to the AI engine.</b>
+</p>
+<table class="table mt-4">
+    <thead>
+        <tr scope="row">
+            <th scope="col" style="width: 20%">Salesforce Key</th>
+            <th scope="col" style="width: 5%"><i class="bi bi-person-check"></i> Reviewer</th>
+            <th scope="col" style="width: 35%"><i class="bi bi-robot"></i> AI translation</th>
+            <th scope="col" style="width: 35%">Adjustment done</th>
+            <th scope="col" style="width: 5%">Language</th>
+            <th scope="col" style="width: 5%">Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trans_unit_adjusted in translations_adjusted_by_reviewers %}
+        <tr>
+            <td>{{ trans_unit_adjusted.salesforce_id }}</td>
+            <td> {{trans_unit_adjusted.request.business_user.first_name}}
+            <td>
+                {% if trans_unit_adjusted.ai_translation is not None %}
+                    {{ trans_unit_adjusted.ai_translation }}
+                {% else %}
+                {% endif %}
+            </td>
+            <td>{{ trans_unit_adjusted.reviewer_translation }}</td>
+            <td>{{ trans_unit_adjusted.language }}</td>
+            <td>{{ trans_unit_adjusted.date_reviewed|date:"Y/m/d" }}</td>
         </tr>
         {% endfor %}
     </tbody>

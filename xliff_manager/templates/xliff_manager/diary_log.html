@@ -57,48 +57,50 @@
             {% if activity.action == 'Requester_Request_Translation_to_LLM' %}
                 <span class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"> </i>{{ activity.action }}</span>
                 <span class="badge text-bg-info rounded-pill">({{ activity.translation_request_id }})</span>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }}.</samp>
+                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}.</samp>
             {%endif%}
             
             {% if activity.action == 'Translation_Received_from_LLM' %}
                 <span class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"> </i>{{ activity.action }}</span>
                 <span class="badge text-bg-info rounded-pill">({{ activity.translation_request_id }})</span>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }}.</samp>
+                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}.</samp>
             {%endif%}
 
             {% if activity.action == 'Requester_Requests_Business_Review' %}
                 <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-1-circle"> </i>{{ activity.action }}</span>
                 <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }}.</samp>
+                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}</samp>
             {%endif%}
             
             {% if activity.action == 'Reviewer_Visualizes_Request' %}
                 <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-2-circle"> </i>{{ activity.action }}</span>
                 <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
             {%endif%}
+
+            {% if activity.action == 'Review_Marked_as_Reviewed' %}
+                <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-2-circle"> </i>{{ activity.action }}</span>
+                <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
+                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}</samp>
+            {%endif%}
             
             {% if activity.action == 'Reviewer_Saves_Custom_Translations' %}
                 <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-3-circle"> </i>{{ activity.action }}</span>
                 <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }}.</samp>
+                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}</samp>
             {%endif%}
 
             {% if activity.action == 'Requester_Downloaded_Review' %}
                 <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-4-circle"> </i>{{ activity.action }}</span>
                 <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
                 <samp>File reviewed for request: {{ activity.review_request_id }} was downloaded.</samp>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }}.</samp>
+                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}</samp>
             {%endif%}
 
-            {% if activity.action == 'Custom_Instrucions_Modified' %}
+            {% if activity.action == 'Saved_Custom_Translations' %}
                 <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-4-circle"> </i>{{ activity.action }}</span>
                 <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
-                {% if activity.additional_info is not None and activity.additional_info != "" %}
-                    <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }}</samp>
-                {%endif%}
+                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}</samp>
             {%endif%}
-            
-
 
         </li>
     </ul>

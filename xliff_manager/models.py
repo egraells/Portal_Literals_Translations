@@ -75,6 +75,7 @@ class TranslationsRequests(models.Model):
 
 class ReviewRequests(models.Model):
     id = models.AutoField(primary_key=True)
+    language = models.ForeignKey('Languages', on_delete=models.CASCADE)
     technical_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='technical_requester', null=False, blank=False) #TODO
     business_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='business_receiver', null=False, blank=False) #TODO
     target_xliff_file = models.FileField(upload_to='review_requests', blank=False)
@@ -89,6 +90,7 @@ class ReviewRequests(models.Model):
 
 class Translations_Units(models.Model):
     id = models.AutoField(primary_key=True)
+    language = models.ForeignKey('Languages', on_delete=models.CASCADE)
     request = models.ForeignKey('ReviewRequests', on_delete=models.CASCADE)
     salesforce_id = models.TextField()
     reviewer_comment = models.TextField(null=True, blank=True)
@@ -136,16 +138,15 @@ class LogDiary(models.Model):
                 self.description = f"Review requested (Review Id generated: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
             case "Reviewer_Visualizes_Request":
                 self.description = f"Review visualized (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
-            case "Reviewer_Saves_Custom_Translations":
-                self.description = f"Translations saved {self.user} at {self.date} - Info: {self.additional_info}"
             case "Reviewer_Declines_Request":
                 self.description = f"Review declined (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
-            case "Reviewer_Mark_as_Reviewed_Request":
+            case "Review_Marked_as_Reviewed":
                 self.description = f"Review marked as reviewed (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
             case "Requester_Downloaded_Review":
                 self.description = f"Review downloaded (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
-            case "Custom_Instrucions_Modified":
-                self.description = f"Review downloaded (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
+            case "Saved_Custom_Translations":
+                self.description = f"Translations saved {self.user} at {self.date} - Info: {self.additional_info}"
+            
             case _:
                 self.description = f"Unknown action: {self.action} at {self.date} - Info: {self.additional_info}"
         

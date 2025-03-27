@@ -6,8 +6,6 @@
 
         <h1 class="mb-4"><i class="bi bi-journal-text"></i>Current Status of all Requests</h1>
         <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
-        <a href="{% url 'request_translation' %}" class="btn  btn-primary">Request a new AI Translation</a>
-        <a href="{% url 'request_review' %}" class="btn  btn-primary">Request Business Review</a>
 
         <div style="margin-top: 15px; margin-bottom: 15px">
             <ul>
@@ -39,10 +37,12 @@
                         <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td> 
                         <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
                         <td>{{ request.date_received_from_llm|date:"Y/m/d H:i" }}</td>
-                        <td><a href="{% url 'download_file' type='translations_request' id=request.id file_to_download=request.source_xliff_file.name %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i>Download</a></td>
+                        <td><a href="{% url 'download_file' type='translations_request' id=request.id file_to_download=request.source_xliff_file.name %}" 
+                            class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i>Download</a></td>
                         <td>
                             {% if request.date_received_from_llm is not None %}
-                                <a href="{% url 'download_file' type='translations_request' id=request.id file_to_download=request.target_xliff_file_name %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
+                                <a href="{% url 'download_file' type='translations_request' id=request.id file_to_download=request.target_xliff_file_name %}" 
+                                class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
                                 {% else %}
                                 Not yet Available
                             {% endif %}
@@ -56,10 +56,11 @@
         <table class="table mt-3 table-sm" >
             <thead>
                 <tr class="text-center">
-                    <th scope="col">Request Id</th>
+                    <th scope="col" style="width:1%">Request Id</th>
                     <th scope="col">Requester to Reviewer</th>
+                    <th scope="col">Language</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Date Created</th>
+                    <th scope="col">Requested Date</th>
                     <th scope="col"><i class="bi bi-tag"></i>Tag</th>
                     <th scope="col">Date Reviewed</th>
                     <th scope="col"></i>Requester Comments</th>
@@ -71,21 +72,22 @@
             <tbody class="table-group-divider">
                 {% for request in review_requests %}
                 <tr class="text-center">
-                    <td style="width:2%" scope="row">{{ request.id }}</td>
-                    <td style="font-size: smaller;">{{ request.technical_user.first_name }} {{ request.technical_user.last_name }} 
+                    <td >{{ request.id }}</td>
+                    <td style="font-size: smaller;">{{ request.technical_user.first_name }}  
                         <i class="bi bi-arrow-right-square-fill" style="color:#ffc107;"></i>
-                        {{ request.business_user.first_name }} {{ request.business_user.last_name }}</td>
+                        {{ request.business_user.first_name }} </td>
+                    <td>{{ request.language.name }}</td>
                     <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td> 
                     <td>{{ request.date_created|date:"Y/m/d" }}</td>
                     <td style="font-size: smaller;">{{ request.info_tag|default_if_none:"-" }}</td>
-                    <td>{{ request.date_reviewed_by_business|date:"Y/m/d H:i" }}</td>
+                    <td>{{ request.date_reviewed_by_business|date:"Y/m/d" }}</td>
                     <td>
-                        {% if request.requester_comment is not None %}
+                        {% if request.requester_comment is not None and request.requester_comment != ''%}
                             <button type="button" class="btn btn-sm btn-light" 
                             data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
-                            title="{{ request.requester_comment }}"><i class="bi bi-chat-dots"></i> View Comments</button>
-                        {%else%} - 
+                            title="{{ request.requester_comment }}"><i class="bi bi-chat-dots"></i> Comments</button>
+                        {%else%}
                         {% endif %}
                     </td>
                     <td>
@@ -93,16 +95,18 @@
                             <button type="button" class="btn btn-sm btn-light" 
                             data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
-                            title="{{ request.reviewer_comment }}"><i class="bi bi-chat-dots"></i>  View Comments</button>
-                        {%else%} - 
+                            title="{{ request.reviewer_comment }}"><i class="bi bi-chat-dots"></i> Comments</button>
+                        {%else%} 
                         {% endif %}
                         </td>
                     <td>
-                        <a href="{% url 'download_file' type='review_request_source_file' id=request.id file_to_download=request.target_xliff_file %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
+                        <a href="{% url 'download_file' type='review_request_source_file' id=request.id file_to_download=request.target_xliff_file %}" 
+                            class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
                     </td>
                     <td style="font-size: smaller;">
                         {% if request.status == 'Reviewed' %}
-                            <a href="{% url 'download_file' type='review_request_target_file' id=request.id file_to_download=request.target_xliff_file %}" class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
+                            <a href="{% url 'download_file' type='review_request_target_file' id=request.id file_to_download=request.target_xliff_file %}"
+                            class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
                         {% else %}
                             Not Reviewed yet
                         {% endif %}    

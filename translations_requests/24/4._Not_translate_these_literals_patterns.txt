@@ -1,1 +1,0 @@
-CustomLabel.PSP_Patient_Portal_*_Link

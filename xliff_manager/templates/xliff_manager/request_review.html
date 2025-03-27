@@ -15,15 +15,25 @@
     <div class="col-md-9">
         <div class="card">
             <div class="card-body">
-                <p>A review is a request for a business representative to review a file translated by the AI engine.</p>
+                <p>A business representative to review a file translated by the AI engine.</p>
                 <form method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="selected_lang_id" value="{{ selected_lang_id }}">
                     {% csrf_token %}
                     <div class="mb-3">
                         <h6>Upload the translations file </h6>
                         <label for="xliff_translations_file" class="form-label">Upload the file and name the Release to be reviewed by the business team.</label>
                         <input type="file" class="form-control" id="xliff_translations_file" name="xliff_translations_file" required>
                     </div>
+
+                    <div class="mb-3">
+                        <h6>Language Selection</h6>
+                        <label for="language" class="form-label">Select the language for the review:</label>
+                        <select class="form-select" id="language" name="language" required>
+                            {% for language in languages %}
+                                <option value="{{ language.id }}">{{ language.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
                     <label for="release" class="form-label">
                         Optionally tag this request. Check the bellow existing list to follow the same pattern.
                     </label>
@@ -38,9 +48,7 @@
                     </div>
                     <div class="mb-3">
                         <h6>Business Reviewer</h6>
-                        <label for="business_reviewer" class="form-label">
-                        Choose the reviewer for this translations:
-                        </label>
+                        <label for="business_reviewer" class="form-label">Choose the reviewer for this translations:</label>
                         <select class="form-select" id="business_reviewer" name="business_reviewer" required>
                             {% for user in users %}
                                 {{user.id}}
