@@ -13,6 +13,7 @@ __pycache__/
 local_settings.py
 db.sqlite3
 .env
+xliff_manager/migrations/
 
 # VS Code ignores
 .vscode/

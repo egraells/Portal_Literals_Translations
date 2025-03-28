@@ -54,7 +54,7 @@
                 {{ activity.user.first_name }}
             </span>
             
-            {% if activity.action == 'Requester_Request_Translation_to_LLM' %}
+            {% if activity.action == 'Requester_Request_Translation_to_AI' %}
                 <span class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"> </i>{{ activity.action }}</span>
                 <span class="badge text-bg-info rounded-pill">({{ activity.translation_request_id }})</span>
                 <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}.</samp>

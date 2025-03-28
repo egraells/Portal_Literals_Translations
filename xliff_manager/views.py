@@ -16,9 +16,6 @@ from django.contrib.auth import logout
 
 from .models import Languages, TranslationsRequests, Translations_Units, ReviewRequests, LogDiary, CustomInstructions
 
-from .forms.translation_form import TranslationForm
-from .forms.language_selection_form import LanguageSelectionForm
-
 from postmarker.core import PostmarkClient
 from django.db.models import Q, F
 
@@ -205,94 +202,65 @@ def do_review_view(request, request_id):
 def request_translation_view(request):
 
     if request.method == 'GET':
-        start_new = request.GET.get('start_new')
-        lang_select_form = LanguageSelectionForm()
         
         return render(request, 'xliff_manager/request_llm_translation.html', 
-            {'lang_select_form': lang_select_form,
-            'selected_lang_id': 0, 
-            'selected_lang_name' : 'None'}
+            {'languages': Languages.objects.all(),}
         )
     
     if request.method == 'POST' :
         action = request.POST.get('action')
-
-        if action == 'language_reset':
-            lang_select_form = LanguageSelectionForm()
-            return render(request, 'xliff_manager/request_llm_translation.html', 
-                {'lang_select_form': lang_select_form,
-                'selected_lang_id': 0, 
-                'selected_lang_name' : 'None'}
-            )
         
-        if action == 'language_selected':
-            lang_selected = int(request.POST.get('languages'))
-            if lang_selected != 0:
-                lang = Languages.objects.get(id=lang_selected)
-                request_translation_form = TranslationForm()
-                return render(request, 'xliff_manager/request_llm_translation.html', 
-                    {'req_trans_form': request_translation_form,
-                    'selected_lang_id': lang.id, 
-                    'selected_lang_name' : lang.name.title() })
-            else:
-                return render(request, 'xliff_manager/request_llm_translation.html', 
-                    {'selected_lang_id': 0, 'selected_lang_name' : 'None'})
-
         if action == 'translate_xliff':
-            request_translation_form = TranslationForm(request.POST, request.FILES)
-            if request_translation_form.is_valid():
-                language_id = request.POST.get('selected_lang_id')
+            language_id = request.POST.get('language_selected')
 
-                # Sanity check: Delete all files in the translations_requests folder
-                for filename in os.listdir(ROOT_FOLDER):
-                    file_path = os.path.join(ROOT_FOLDER, filename)
-                    if os.path.isfile(file_path):
-                        os.remove(file_path)
+            # Sanity check: Delete all files in the translations_requests folder
+            for filename in os.listdir(ROOT_FOLDER):
+                file_path = os.path.join(ROOT_FOLDER, filename)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
 
-                trans_request = TranslationsRequests(
-                    language = Languages.objects.get(id=language_id),
-                    request_user = request.user,
-                    source_xliff_file = request.FILES['xliff_source_file'],
-                    target_xliff_file_name = request.FILES['xliff_source_file'].name + '_translated.xlf',
-                    literals_to_exclude_file = request.FILES['literal_ids_to_exclude_file'] if 'literal_ids_to_exclude_file' in request.FILES else None,
-                    literalpatterns_to_exclude_file = request.FILES['literal_patterns_to_exclude_file'] if 'literal_patterns_to_exclude_file' in request.FILES else None,
-                )
-                trans_request.save()
+            trans_request = TranslationsRequests(
+                language = Languages.objects.get(id=language_id),
+                request_user = request.user,
+                source_xliff_file = request.FILES['xliff_source_file'],
+                target_xliff_file_name = request.FILES['xliff_source_file'].name + '_translated.xlf',
+                literals_to_exclude_file = request.FILES['literal_ids_to_exclude_file'] if 'literal_ids_to_exclude_file' in request.FILES else None,
+                literalpatterns_to_exclude_file = request.FILES['literal_patterns_to_exclude_file'] if 'literal_patterns_to_exclude_file' in request.FILES else None,
+            )
+            trans_request.save()
 
-                # Move files this request to the folder with the Id 
-                dest_folder = os.path.join(ROOT_FOLDER, str(trans_request.id)) 
-                os.makedirs(dest_folder, exist_ok=True)
+            # Move files this request to the folder with the Id 
+            dest_folder = os.path.join(ROOT_FOLDER, str(trans_request.id)) 
+            os.makedirs(dest_folder, exist_ok=True)
 
-                source_xliff_file_only_name = os.path.basename(trans_request.source_xliff_file.name)
-                shutil.move(trans_request.source_xliff_file.name, os.path.join(dest_folder, source_xliff_file_only_name))
-                trans_request.source_xliff_file = source_xliff_file_only_name
-                
-                
-                if trans_request.literals_to_exclude_file:
-                    exclude_file_name_only = os.path.basename(trans_request.literals_to_exclude_file.name)
-                    shutil.move(os.path.join(ROOT_FOLDER, exclude_file_name_only), 
-                                os.path.join(dest_folder, exclude_file_name_only))
-                    trans_request.literals_to_exclude_file = exclude_file_name_only
-                
-                if trans_request.literalpatterns_to_exclude_file:
-                    exclude_patterns_file_name_only = os.path.basename(trans_request.literalpatterns_to_exclude_file.name)
-                    shutil.move(os.path.join(ROOT_FOLDER, exclude_patterns_file_name_only), 
-                                os.path.join(dest_folder, exclude_patterns_file_name_only))
-                    trans_request.literalpatterns_to_exclude_file = exclude_patterns_file_name_only
+            source_xliff_file_only_name = os.path.basename(trans_request.source_xliff_file.name)
+            shutil.move(trans_request.source_xliff_file.name, os.path.join(dest_folder, source_xliff_file_only_name))
+            trans_request.source_xliff_file = source_xliff_file_only_name
+            
+            
+            if trans_request.literals_to_exclude_file:
+                exclude_file_name_only = os.path.basename(trans_request.literals_to_exclude_file.name)
+                shutil.move(os.path.join(ROOT_FOLDER, exclude_file_name_only), 
+                            os.path.join(dest_folder, exclude_file_name_only))
+                trans_request.literals_to_exclude_file = exclude_file_name_only
+            
+            if trans_request.literalpatterns_to_exclude_file:
+                exclude_patterns_file_name_only = os.path.basename(trans_request.literalpatterns_to_exclude_file.name)
+                shutil.move(os.path.join(ROOT_FOLDER, exclude_patterns_file_name_only), 
+                            os.path.join(dest_folder, exclude_patterns_file_name_only))
+                trans_request.literalpatterns_to_exclude_file = exclude_patterns_file_name_only
 
-                trans_request.save()
+            trans_request.save()
 
-                LogDiary.objects.create(
-                    user=request.user,
-                    action="Requester_Request_Translation_to_LLM",
-                    translation_request_id=f"{trans_request.id}",
-                )
+            LogDiary.objects.create(
+                user=request.user,
+                action="Requester_Request_Translation_to_AI",
+                translation_request_id=f"{trans_request.id}",
+            )
 
-                return render(request, 'xliff_manager/request_llm_confirmation.html', 
-                    {'trans_request': trans_request})
-            else:
-                print(request_translation_form.errors)
-                return HttpResponse('Error! Segurament algun fitxer és buit')
+            return render(request, 'xliff_manager/request_llm_confirmation.html', 
+                {'trans_request': trans_request})
+           
     else:
         return render(request, 'xliff_manager/request_llm_translation.html', 
             {'selected_language': 0})

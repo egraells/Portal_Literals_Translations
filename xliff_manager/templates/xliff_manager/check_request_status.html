@@ -4,7 +4,7 @@
 <body>
     <div class="container mb-4">
 
-        <h1 class="mb-4"><i class="bi bi-journal-text"></i>Current Status of all Requests</h1>
+        <h1 class="mb-4"><i class="bi bi-journal-text"></i>Requests status</h1>
         <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
 
         <div style="margin-top: 15px; margin-bottom: 15px">
@@ -15,6 +15,8 @@
         </div>
 
         <h2  style="margin-top: 30px">AI translations Requests</h5>
+            <p class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"></i> Created</p> meaning is pending the AI engine. <br>
+            <p class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"></i> AI translation ready</p> meaning the translation by the AI engine is ready and file is ready to be downloaded and reviewed.
             <table class="table mt-3 table-sm" >
                 <thead>
                     <tr class="text-center">
@@ -23,7 +25,7 @@
                         <th scope="col">Requester</th>
                         <th scope="col">Status</th>
                         <th scope="col">Date Created</th>
-                        <th scope="col">Received from LLM</th>
+                        <th scope="col">Received from AI</th>  
                         <th scope="col">Original file</th>
                         <th scope="col">Translated file</th>
                     </tr>
@@ -34,9 +36,15 @@
                         <td scope="row">{{ request.id }}</td>
                         <td>{{ request.language.name }}</td>
                         <td>{{ request.request_user.first_name }} {{ request.request_user.last_name }}</td>
-                        <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td> 
-                        <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
-                        <td>{{ request.date_received_from_llm|date:"Y/m/d H:i" }}</td>
+                        <td><span class="badge rounded-pill text-bg-primary">
+                            {% if request.status == "Created"%}
+                                <i class="bi bi-1-circle"></i> Created
+                            {% else %}
+                                <i class="bi bi-2-circle"></i> AI translation ready
+                            {% endif %}
+                        </span></td>
+                        <td>{{ request.date_created|date:"Y/m/d" }}</td>
+                        <td>{{ request.date_received_from_llm|date:"Y/m/d" }}</td>
                         <td><a href="{% url 'download_file' type='translations_request' id=request.id file_to_download=request.source_xliff_file.name %}" 
                             class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i>Download</a></td>
                         <td>
@@ -53,6 +61,9 @@
             </table>
 
         <h2 style="margin-top: 50px"> Reviews requested to Business Experts</h5>
+        <p class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"></i> Created</p> meaning is pending the Reviewer. <br>
+        <p class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"></i> Reviewed</p> meaning the Reviewer already reviewed the translations and the file is ready to be downloaded and uploaded to Salesforce.
+            
         <table class="table mt-3 table-sm" >
             <thead>
                 <tr class="text-center">
@@ -77,7 +88,13 @@
                         <i class="bi bi-arrow-right-square-fill" style="color:#ffc107;"></i>
                         {{ request.business_user.first_name }} </td>
                     <td>{{ request.language.name }}</td>
-                    <td><span class="badge rounded-pill text-bg-primary">{{ request.status }}</span></td> 
+                    <td><span class="badge rounded-pill text-bg-primary">
+                        {% if request.status == "Created"%}
+                            <i class="bi bi-1-circle"></i> Created
+                        {% else %}
+                            <i class="bi bi-2-circle"></i> Reviewed
+                        {% endif %}
+                    </span></td> 
                     <td>{{ request.date_created|date:"Y/m/d" }}</td>
                     <td style="font-size: smaller;">{{ request.info_tag|default_if_none:"-" }}</td>
                     <td>{{ request.date_reviewed_by_business|date:"Y/m/d" }}</td>

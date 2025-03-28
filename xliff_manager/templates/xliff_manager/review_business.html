@@ -19,7 +19,7 @@
         <li class="list-group-item">{{review_request.technical_user.first_name}} {{review_request.technical_user.last_name}} requested
           to {{ review_request.business_user.first_name }} {{ review_request.business_user.last_name }}
           a review in <b>{{review_request.language.name}}</b>
-          on {{review_request.date_created |date:"Y/m/d H:i"}} 
+          on {{review_request.date_created |date:"Y/m/d"}} 
           containing <b>{{translations | length}} translations</b>.</li>
           {% if review_request.requester_comment or review_request.info_tag%}
         <li class="list-group-item"><b>Comment:</b> <i>"{{review_request.requester_comment|default:'-'}}" </i>

@@ -17,6 +17,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='logdiary',
             name='accio',
-            field=models.CharField(blank=True, choices=[('RRTTLLM', 'Requester_Request_Translation_to_LLM'), ('TRFLLM', 'Translation_Received_from_LLM'), ('RV', 'REvision')], max_length=50, null=True),
+            field=models.CharField(blank=True, choices=[('RRTTLLM', 'Requester_Request_Translation_to_AI'), ('TRFLLM', 'Translation_Received_from_LLM'), ('RV', 'REvision')], max_length=50, null=True),
         ),
     ]

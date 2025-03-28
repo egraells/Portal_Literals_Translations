@@ -29,7 +29,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title"><i class="bi bi-filetype-xml"></i> Request an AI Translation</h5>
-                        <p class="card-text">Submit an XLIFF file extracted from Salesforce for translation to the AI engine.</p>
+                        <p class="card-text">Submit an XLIFF file with Literals, extracted from Salesforce, for translation to the AI engine.</p>
                         <a href="{% url 'request_translation' %}" class="btn btn-primary">Request an AI Translation</a>
                     </div>
                     <div class="card-footer">
@@ -47,6 +47,9 @@
                         <small class="text-body-secondary">An XLIFF file is required.</small>
                     </div>
                 </div>
+            </div>
+
+            <div class="card-group" style="margin-bottom: 30px">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title"><i class="bi bi-filetype-xml"></i> Check Request Status for AI and Business Review</h5>
@@ -58,6 +61,7 @@
                     </div>
                 </div>
             </div>
+            
             {% endif %}
 
             {% if "Reviewer" in user.groups.all|join:", " %}
@@ -65,7 +69,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title"><i class="bi bi-card-checklist"></i> User Reviews</h5>
-                        <p class="card-text">Reviews that are pending for you to provide feedback based on professional vocabulary and expressions that better suits the project.</p>
+                        <p class="card-text">Check all your Review requests, regardless of the status.</p>
                         <a href="{% url 'choose_review_view' %}" class="btn btn-primary">Check my Reviews</a>
                     </div>
                     <div class="card-footer">
@@ -73,6 +77,8 @@
                             <i class="bi bi-mailbox2-flag" style="font-size: 1rem; color: #dc3545;margin-right: 5px"></i>
                             <small class="text-body-secondary">
                                 You currently have <b>{{pending_requests_count}} pending reviews.</b></small>
+                        {% else %}
+                            <small class="text-body-secondary">✅ You currently have no pending reviews.</small>
                         {% endif %}
                     </div>
                 </div>

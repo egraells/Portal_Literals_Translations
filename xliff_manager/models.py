@@ -106,7 +106,7 @@ class Translations_Units(models.Model):
 
 class LogDiary(models.Model):
     class Action(models.TextChoices): 
-        REQUESTER_REQUEST_TRANSLATION_TO_LLM = 'RRTTLLM', 'Requester_Request_Translation_to_LLM'   
+        Requester_Request_Translation_to_AI = 'RRTTLLM', 'Requester_Request_Translation_to_AI'   
         TRANSLATION_RECEIVED_FROM_LLM = 'TRFLLM', 'Translation_Received_from_LLM'  
         EN_REVISIO = 'RV', 'REvision'
     
@@ -130,25 +130,25 @@ class LogDiary(models.Model):
     def save(self, *args, **kwargs):
 
         match self.action:
-            case "Requester_Request_Translation_to_LLM":
-                self.description = f"Translation requested (Translation Id Generated: {self.translation_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
+            case "Requester_Request_Translation_to_AI":
+                self.description = f"Translation requested (Translation Id Generated: {self.translation_request_id}) by {self.user.name}  - Additional Info: {self.additional_info}"
             case "Translation_Received_from_LLM":
-                self.description = f"Translation received from LLM (Translation id: {self.translation_request_id}) - Info: {self.additional_info}"
+                self.description = f"Translation received from LLM (Translation id: {self.translation_request_id})  - Additional Info: {self.additional_info}"
             case "Requester_Requests_Business_Review":
-                self.description = f"Review requested (Review Id generated: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
+                self.description = f"Review requested (Review Id generated: {self.review_request_id}) by {self.user} at {self.date}  - Additional Info: {self.additional_info}"
             case "Reviewer_Visualizes_Request":
-                self.description = f"Review visualized (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
+                self.description = f"Review visualized (Review Id: {self.review_request_id}) by {self.user} at {self.date}  - Additional Info: {self.additional_info}"
             case "Reviewer_Declines_Request":
-                self.description = f"Review declined (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
+                self.description = f"Review declined (Review Id: {self.review_request_id}) by {self.user} at {self.date}  - Additional Info: {self.additional_info}"
             case "Review_Marked_as_Reviewed":
-                self.description = f"Review marked as reviewed (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
+                self.description = f"Review marked as reviewed (Review Id: {self.review_request_id}) by {self.user} at {self.date}  - Additional Info: {self.additional_info}"
             case "Requester_Downloaded_Review":
-                self.description = f"Review downloaded (Review Id: {self.review_request_id}) by {self.user} at {self.date} - Info: {self.additional_info}"
+                self.description = f"Review downloaded (Review Id: {self.review_request_id}) by {self.user} at {self.date}  - Additional Info: {self.additional_info}"
             case "Saved_Custom_Translations":
-                self.description = f"Translations saved {self.user} at {self.date} - Info: {self.additional_info}"
+                self.description = f"Translations saved {self.user} at {self.date}  - Additional Info: {self.additional_info}"
             
             case _:
-                self.description = f"Unknown action: {self.action} at {self.date} - Info: {self.additional_info}"
+                self.description = f"Unknown action: {self.action} at {self.date}  - Additional Info: {self.additional_info}"
         
         super().save(*args, **kwargs)
 
