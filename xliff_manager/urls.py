@@ -19,6 +19,7 @@ urlpatterns = [
     path('diary_log', views.diary_log_view, name='diary_log'),
     path('custom_instructions', views.custom_instructions_view, name='custom_instructions'),
 
+    path('download_file_confirmed/', views.download_file_confirmed, name='download_file_confirmed'),
     path('download_file/<str:type>/<str:id>/<path:file_to_download>/', views.download_file, name='download_file'),
     
     path('login/', LoginView.as_view(template_name='xliff_manager/login.html'), name='login'),
@@ -26,6 +27,6 @@ urlpatterns = [
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'), 
     path('admin/', admin.site.urls),
     path('userpage', views.userpage, name='userpage'),
-
+    
     path('confirm_insertion/<int:num_records>/', views.confirm_insertion_view, name='confirm_insertion'),
 ]

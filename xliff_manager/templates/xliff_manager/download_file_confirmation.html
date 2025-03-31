@@ -1,0 +1,39 @@
+{% extends 'base_template.html' %}
+
+{% block body %}
+
+<h1 class="mb-4">Downloading an AI Translated file : 
+</h1>
+<p class="mb-0"><a href="{% url 'home' %}" class="btn btn-outline-primary" style="margin-bottom: 20px">Back to Home</a></p>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="card-header">Confirmation Required</div>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning" role="alert">
+                The current Novartis SOPs for AI translations requires that a 
+                Business Review is done before uploading the file to a user facing system (Production Instance). <br>
+                <p>If you are downloading this file for testing purposes, please make sure that you are not using it in a production environment. <br>
+                <p><b>Your confirmation implies that this</b> file will be used <b>ONLY</b> for testing purposes and not in a production environment. <br>
+                <br>
+                <div class="d-flex justify-content-center">
+                    <button id="activate-download" class="btn btn-warning">I confirm this file is only for testing purposes</button>
+                </div>
+                <script>
+                    document.getElementById('activate-download').addEventListener('click', function() {
+                        document.getElementById('download-link').classList.remove('d-none');
+                    });
+                </script>
+                <div class="d-flex justify-content-center" style="margin-top: 20px">
+                    <form method="post" action="{% url 'download_file_confirmed' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="type" value="translations_request_AItranslated_file_confirmed">
+                        <input type="hidden" name="id" value="{{ id }}">
+                        <input type="hidden" name="file_to_download" value="{{ file_to_download }}">
+                        <button type="submit" class="btn btn-primary d-none" id="download-link">Download</button>
+                    </form>
+            </div>
+    </div>
+
+{% endblock %}

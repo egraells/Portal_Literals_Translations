@@ -50,19 +50,62 @@ def login_view(request):
     return render(request, 'xliff_manager/login.html', {'form': form})
 
 @login_required
-def download_file(request, type:str, id:str, file_to_download:str):
-    if type == 'translations_request':
-        file_path = os.path.join('translations_requests', str(id), file_to_download)
-    elif type == 'review_request':
-        file_path = os.path.join('review_requests', str(id), file_to_download) # or o s.path.join(settings.STATIC_ROOT, 'files', filename)
+def download_file(request, type:str=None, id:str=None, file_to_download:str=None):
+    if request.method == 'GET' and type == 'translations_request_AItranslated_file':
+        return render(request, 'xliff_manager/download_file_confirmation.html', {
+            'id': id,
+            'file_to_download': file_to_download,
+            'type': type,
+        })
     
-    if os.path.exists(file_path):
-        with open(file_path, 'rb') as f:
-            response = HttpResponse(f.read(), content_type='application/force-download')
-            response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
-            return response
-    else:
-        return HttpResponse("File not found", status=404)
+    if request.method == 'GET' and \
+        (type in ["review_request_source_file", "review_request_target_file", "translations_request_AItranslated_file"]):
+        file_path = os.path.join('review_requests', str(id), file_to_download)
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='application/force-download')
+                response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
+                return response
+        else:
+            return HttpResponse("File not found", status=404)
+    
+    if request.method == 'GET' and type == 'translations_request_original_file':
+        file_path = os.path.join('translations_requests', str(id), file_to_download)
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='application/force-download')
+                response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
+                return response
+        else:
+            return HttpResponse("File not found", status=404)
+    
+    if request.method == 'GET' and type == 'translations_request_AItranslated_file_confirmed':
+        file_path = os.path.join('translations_requests', str(id), file_to_download)
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='application/force-download')
+                response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
+                return response
+        else:
+            return HttpResponse("File not found", status=404)
+    
+    return HttpResponse("Invalid request", status=400)
+
+def download_file_confirmed(request):
+    if request.method == 'POST':
+        type = request.POST.get('type')
+        id = request.POST.get('id')
+        file_to_download = request.POST.get('file_to_download')
+
+        if type == 'translations_request_AItranslated_file_confirmed':
+            file_path = os.path.join('translations_requests', str(id), file_to_download)
+            if os.path.exists(file_path):
+                with open(file_path, 'rb') as f:
+                    response = HttpResponse(f.read(), content_type='application/force-download')
+                    response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
+                    return response
+            else:
+                return HttpResponse("File not found", status=404)
 
 def read_xliff_file(xliff_file):
     tree = ET.parse(xliff_file)
