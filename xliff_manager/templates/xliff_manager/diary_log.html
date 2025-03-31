@@ -11,32 +11,31 @@
 <div style="margin-top: 15px; margin-bottom: 15px">
     <h3>Legend and expected sequence of events</h3>
     The infomation provided in this Log is as follows:
-    <p>1. <span class="badge text-bg-warning rounded-pill"><i class="bi bi-calendar-date"></i> Date & Time   </span>
+    <p>
+    <span class="badge text-bg-warning rounded-pill"><i class="bi bi-calendar-date"></i> Date & Time   </span>
         Time when the event happened: all dates are shown in GMT format 
-    </p>
-    <p>3.
+    <p>
         <span class="badge text-bg-success rounded-pill">
             <i class="bi bi-person"></i> User firstname
         </span>
         The user that genereated the event 
     </p>
-    <p>3. Expected sequence of events:<p>
-        <p>For a Translation Request:</p>
-        <p class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"></i> A Developer requests for a AI Translation</p>
-        <p class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"></i> The AI generated the translations</p>
-
-        <p>For a Business Review Request:</p>
-        <p class="badge text-bg-secondary rounded-pill"><i class="bi bi-1-circle"></i> A Developer requests for a Business Review</p>
-        <p class="badge text-bg-secondary rounded-pill"><i class="bi bi-2-circle"></i> A Business Reviewer visualizes a Request</p>
-        <p class="badge text-bg-secondary rounded-pill"><i class="bi bi-3-circle"></i> A Business Reviewer provides custom translations for some literals</p>
-        <p class="badge text-bg-secondary rounded-pill"><i class="bi bi-4-circle"></i> A Business Reviewer mark as Reviewed</p>
-        <p class="badge text-bg-secondary rounded-pill"><i class="bi bi-5-circle"></i> A developer downloads the Reviewed file.</p>
-    <p>4. <span class="badge text-bg-info rounded-pill">Id</span> of the request, which might be either:
-        <ul>
-            <li>A Translation Request
-            <li>A Business Request have different Ids.
-        </ul>
-    <p>5. Additional information about the event.</p>
+    <p>
+        An event title:
+            <span class="badge rounded-pill text-bg-primary"><i class="bi bi-1-circle"></i> A Developer requests for a AI Translation</span>
+            <span class="badge rounded-pill text-bg-primary"><i class="bi bi-2-circle"></i> The AI generated the translations</span>
+        regarding <b>requests for AI translations</b>, and 
+            <span class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"></i> A Developer requests for a Business Review</span>
+            <span class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"></i> A Business Reviewer visualizes a Request</span>
+            <span class="badge text-bg-primary rounded-pill"><i class="bi bi-3-circle"></i> A Business Reviewer provides custom translations for some literals</span>
+            <span class="badge text-bg-primary rounded-pill"><i class="bi bi-4-circle"></i> A Business Reviewer mark as Reviewed</span>
+            <span class="badge text-bg-primary rounded-pill"><i class="bi bi-5-circle"></i> A developer downloads the Reviewed file</span>
+        regarding requests for <b>Business reviews</b>.
+    <p>
+        <span class="badge text-bg-info rounded-pill">Id</span> of the request, allowing to follow a request through the log.
+    <p>
+        <span class="badge text-bg-secondary rounded-pill">Details</span> of the request, to provide more context to the event.
+    </p>
 </div>
 
 
@@ -44,64 +43,50 @@
     {% for activity in activity_list%}
     <ul class="list-group list-group-flush">
         <li class="list-group-item" style="padding-top:2px; padding-bottom:2px; ">
-            <span class="badge text-bg-warning rounded-pill">
-                <i class="bi bi-calendar-date"></i>
-                {{ activity.date|date:"Y-m-d H:i:s" }} 
-            </span>
-
-            <span class="badge text-bg-success rounded-pill">
-                <i class="bi bi-person"></i>
-                {{ activity.user.first_name }}
-            </span>
             
-            {% if activity.action == 'Requester_Request_Translation_to_AI' %}
-                <span class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"> </i>{{ activity.action }}</span>
+
+            {% if activity.action == 'Requester_Request_Translation_to_AI' or activity.action == 'Translation_Received_from_AI' or activity.action == 'Requester_Requests_Business_Review' or activity.action == 'Reviewer_Visualizes_Request' or activity.action == 'Review_Marked_as_Reviewed' or activity.action == 'Reviewer_Saves_Custom_Translations' or activity.action == 'Requester_Downloaded_Review' or activity.action == 'Saved_Custom_Translations' or activity.action == 'Saved_Custom_Instructions' %}
+                <span class="badge text-bg-warning rounded-pill">
+                    <i class="bi bi-calendar-date"></i>
+                    {{ activity.date|date:"Y-m-d H:i:s" }} 
+                </span>
+
+                <span class="badge text-bg-success rounded-pill">
+                    <i class="bi bi-person"></i>
+                    {{ activity.user.first_name }} {{ activity.user.last_name }}
+                </span>
+                
+                <span class="badge text-bg-primary rounded-pill">{{ activity.action }}</span>
+
+                <span class="badge text-bg-info rounded-pill">
+                    {% if activity.translation_request_id %}
+                        {{ activity.translation_request_id | default_if_none:'-' }}
+                    {% else %}
+                        {{ activity.review_request_id | default_if_none:'-' }}
+                    {% endif%}
+                </span>
+                
+                <samp><i style="color:grey"> Details: </i>
+                    {% if activity.additional_info %}
+                        {{ activity.additional_info|default_if_none:'None' }} 
+                    {% else %}
+                        {{ activity.description|default_if_none:'None'}}
+                    {% endif %}
+                </samp>
+            
+            {% else %}
+                <span class="badge text-bg-danger rounded-pill">{{ activity.action }}?</span>
                 <span class="badge text-bg-info rounded-pill">({{ activity.translation_request_id }})</span>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}.</samp>
-            {%endif%}
+                <br>
+                <samp><i class="bi bi-chat-square-text" style="color:red"> Details: </i>
+                    {% if activity.additional_info %}
+                        {{ activity.additional_info|default_if_none:'None' }} 
+                    {% else %}
+                        {{ activity.description|default_if_none:'None'}}
+                    {% endif %}
+                </samp>
             
-            {% if activity.action == 'Translation_Received_from_LLM' %}
-                <span class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"> </i>{{ activity.action }}</span>
-                <span class="badge text-bg-info rounded-pill">({{ activity.translation_request_id }})</span>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}.</samp>
-            {%endif%}
-
-            {% if activity.action == 'Requester_Requests_Business_Review' %}
-                <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-1-circle"> </i>{{ activity.action }}</span>
-                <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}</samp>
-            {%endif%}
-            
-            {% if activity.action == 'Reviewer_Visualizes_Request' %}
-                <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-2-circle"> </i>{{ activity.action }}</span>
-                <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
-            {%endif%}
-
-            {% if activity.action == 'Review_Marked_as_Reviewed' %}
-                <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-2-circle"> </i>{{ activity.action }}</span>
-                <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}</samp>
-            {%endif%}
-            
-            {% if activity.action == 'Reviewer_Saves_Custom_Translations' %}
-                <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-3-circle"> </i>{{ activity.action }}</span>
-                <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}</samp>
-            {%endif%}
-
-            {% if activity.action == 'Requester_Downloaded_Review' %}
-                <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-4-circle"> </i>{{ activity.action }}</span>
-                <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
-                <samp>File reviewed for request: {{ activity.review_request_id }} was downloaded.</samp>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}</samp>
-            {%endif%}
-
-            {% if activity.action == 'Saved_Custom_Translations' %}
-                <span class="badge text-bg-secondary rounded-pill"><i class="bi bi-4-circle"> </i>{{ activity.action }}</span>
-                <span class="badge text-bg-info rounded-pill">Id: {{ activity.review_request_id }}</span>
-                <br><samp><i class="bi bi-chat-square-text" style="color:grey"> Details: </i>{{ activity.additional_info }} {{ activity.description}}</samp>
-            {%endif%}
-
+            {% endif %}
         </li>
     </ul>
     {% endfor %}

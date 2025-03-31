@@ -11,7 +11,7 @@ __pycache__/
 # Django ignores
 /secret.key  # Or whatever you name your secret key file
 local_settings.py
-db.sqlite3
+# db.sqlite3
 .env
 xliff_manager/migrations/
 

@@ -434,7 +434,8 @@ def custom_instructions_view(request):
         # Log the action in the LogDiary
         LogDiary.objects.create(
             user=request.user,
-            action="Saved_Custom_Translations",
+            action="Saved_Custom_Instructions",
+            date=timezone.now(),
         )
         
         return render(request, 'xliff_manager/custom_instructions_confirmation.html', {'num_records': len(custom_instructions)})
