@@ -27,10 +27,11 @@ STATIC_URL = 'static/'
 
 # Load environment variables
 load_dotenv()
-ROOT_FOLDER = os.environ.get("ROOT_FOLDER")
-EMAIL_HOST = os.environ.get("EMAIL_HOST")
-SEND_EMAILS = os.environ.get("SEND_EMAILS")
+ROOT_FOLDER = os.getenv("ROOT_FOLDER")
+print(f"ROOT_FOLDER: {ROOT_FOLDER}")
 
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+SEND_EMAILS = os.getenv("SEND_EMAILS")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
