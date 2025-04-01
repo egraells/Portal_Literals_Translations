@@ -23,6 +23,8 @@ MEDIA_ROOT = BASE_DIR
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = 'static/'
 
+ROOT_FOLDER = os.environ.get("ROOT_FOLDER")
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -87,7 +89,7 @@ WSGI_APPLICATION = 'xliff_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db_ai_translations_local.sqlite3',
+        'NAME': BASE_DIR / 'db_ai_translations.sqlite3',
     }
 }
 
