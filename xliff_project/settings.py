@@ -10,8 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from pathlib import Path
 import os
+from dotenv import load_dotenv
+from pathlib import Path
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +25,12 @@ MEDIA_ROOT = BASE_DIR
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = 'static/'
 
+# Load environment variables
+load_dotenv()
 ROOT_FOLDER = os.environ.get("ROOT_FOLDER")
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
+SEND_EMAILS = os.environ.get("SEND_EMAILS")
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -133,6 +140,3 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
-# EGE: to send emails to the requester and reviewer
-EMAIL_HOST = os.environ.get("EMAIL_HOST")
-SEND_EMAILS = os.environ.get("SEND_EMAILS")
