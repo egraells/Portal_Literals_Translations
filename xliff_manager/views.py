@@ -19,8 +19,10 @@ from .models import Languages, TranslationsRequests, Translations_Units, ReviewR
 
 from postmarker.core import PostmarkClient
 
+ROOT_FOLDER = os.getenv("ROOT_FOLDER")
+SEND_EMAILS = os.getenv("SEND_EMAILS")
+
 def userpage(request):
-     
     return render(request, 'xliff_manager/userpage.html')
 
 def home(request):

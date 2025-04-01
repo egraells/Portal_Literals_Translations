@@ -38,7 +38,6 @@
     </p>
 </div>
 
-
 <h2 style="margin-top: 50px">Diary Log (newer to older)</h5>
     {% for activity in activity_list%}
     <ul class="list-group list-group-flush">
@@ -57,10 +56,10 @@
                 </span>
                 
                 <span class="badge text-bg-primary rounded-pill">{{ activity.action }}</span>
-
+                    
                 <span class="badge text-bg-info rounded-pill">
                     {% if activity.translation_request_id %}
-                        {{ activity.translation_request_id | default_if_none:'-' }}
+                    {{ activity.translation_request_id | default_if_none:'-' }}
                     {% else %}
                         {{ activity.review_request_id | default_if_none:'-' }}
                     {% endif%}
