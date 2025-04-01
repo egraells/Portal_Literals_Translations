@@ -2,6 +2,7 @@ import os
 import shutil
 from datetime import datetime
 import xml.etree.ElementTree as ET
+from dotenv import load_dotenv
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -17,11 +18,6 @@ from django.contrib.auth import logout
 from .models import Languages, TranslationsRequests, Translations_Units, ReviewRequests, LogDiary, CustomInstructions
 
 from postmarker.core import PostmarkClient
-from django.db.models import Q, F
-
-
-ROOT_FOLDER = "translations_requests"
-SEND_EMAILS = False
 
 def userpage(request):
      
