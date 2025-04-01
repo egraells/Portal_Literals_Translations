@@ -131,7 +131,7 @@ class LogDiary(models.Model):
 
         match self.action:
             case "Requester_Request_Translation_to_AI":
-                self.description = f"Translation requested (Translation Id Generated: {self.translation_request_id}) by {self.user.name}  - Additional Info: {self.additional_info}"
+                self.description = f"Translation requested (Translation Id Generated: {self.translation_request_id}) - Additional Info: {self.additional_info}"
             case "Translation_Received_from_LLM":
                 self.description = f"Translation received from LLM (Translation id: {self.translation_request_id})  - Additional Info: {self.additional_info}"
             case "Requester_Requests_Business_Review":

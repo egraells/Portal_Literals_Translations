@@ -280,7 +280,6 @@ def request_translation_view(request):
             shutil.move(trans_request.source_xliff_file.name, os.path.join(dest_folder, source_xliff_file_only_name))
             trans_request.source_xliff_file = source_xliff_file_only_name
             
-            
             if trans_request.literals_to_exclude_file:
                 exclude_file_name_only = os.path.basename(trans_request.literals_to_exclude_file.name)
                 shutil.move(os.path.join(ROOT_FOLDER, exclude_file_name_only), 
@@ -296,9 +295,9 @@ def request_translation_view(request):
             trans_request.save()
 
             LogDiary.objects.create(
-                user=request.user,
-                action="Requester_Request_Translation_to_AI",
-                translation_request_id=f"{trans_request.id}",
+                user = request.user, 
+                action = "Requester_Request_Translation_to_AI",
+                translation_request_id = f"{trans_request.id}",
             )
 
             return render(request, 'xliff_manager/request_llm_confirmation.html', 

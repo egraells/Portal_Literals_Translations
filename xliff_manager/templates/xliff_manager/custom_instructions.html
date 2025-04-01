@@ -17,21 +17,27 @@
 {% block body %}
 <h1><i class="bi bi-robot"></i>Custom Instructions for AI Translations</h1>
 
+<ul>
+    <li>Instructions are used by the AI engine during the translation process.</li>
+    <li>Although, usually a reviewer manages only one language, here are listed all the modifications, allowing a consistency cross-check.</li>
+    <li>The more specific and concret is the instruction the better. Vague or inconclusive statements are not well managed by AI engines.</li>
+</ul>
+
 <a style="margin-top: 15px" href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
 
 <table class="table mt-4">
     <thead>
         <tr>
             <th scope="col">Language</th>
-            <th scope="col">Instructions</th>
-            <th scope="col">Last Modified By</th>
+            <th scope="col">Instructions (these will be used during the AI generation, and will influence the results)</th>
+            <th scope="col">By</th>
         </tr>
     </thead>
     <tbody>
         {% for instruction in custom_instructions %}
         <tr>
-            <td style="width: 10%"><i class="bi bi-globe-americas"></i> {{ instruction.language.name }}</td>
-            <td style="width: 75%">
+            <td style="width: 5%"><i class="bi bi-globe-americas"></i> {{ instruction.language.name }}</td>
+            <td style="width: 85%">
                 <form method="post">
                     {% csrf_token %}
                     <input type="hidden" name="instruction_id" value="{{ instruction.id }}">
@@ -39,7 +45,9 @@
                     <button type="submit" class="btn btn-primary mt-2">Save changes</button>
                 </form>
             </td>
-            <td>{{ instruction.user_last_modification.first_name }} {{ instruction.user_last_modification.last_name }} ({{ instruction.date_last_modification }})</td>
+            <td>{{ instruction.user_last_modification.first_name }} 
+                {{ instruction.user_last_modification.last_name }} 
+                ({{ instruction.date_last_modification|date:"Y/m/d" }})</td>
         </tr>
         {% endfor %}
     </tbody>

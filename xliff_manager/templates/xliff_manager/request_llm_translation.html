@@ -8,7 +8,7 @@
 <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
 <a href="{% url 'check_request_status' %}" class="btn btn-primary">Check Requests Status</a>
         
-<div class="row" style="margin-bottom: 15px">
+<div class="row" style="margin-top:20px; margin-bottom: 20px">
     <div class="col-md-9">
         <div class="card">
             <div class="card-body">
@@ -36,14 +36,14 @@
                         <h6>File with literals to be excluded</h6>
                         <div class="mb-3">
                             <label for="literal_ids_to_exclude_file" class="form-label">Upload the file and name the Release to be reviewed by the business team.</label>
-                            <input type="file" class="form-control" id="literal_ids_to_exclude_file" name="literal_ids_to_exclude_file" required>
+                            <input type="file" class="form-control" id="literal_ids_to_exclude_file" name="literal_ids_to_exclude_file" >
                         </div>
                     </div>
                     <div class="mb-3">
                         <h6>Exclusion patterns</h6>
                         <div class="mb-3">
                             <label for="literal_patterns_to_exclude_file" class="form-label">Upload the file and name the Release to be reviewed by the business team.</label>
-                            <input type="file" class="form-control" id="literal_patterns_to_exclude_file" name="literal_patterns_to_exclude_file" required>
+                            <input type="file" class="form-control" id="literal_patterns_to_exclude_file" name="literal_patterns_to_exclude_file">
                         </div>
                     </div>
                     <button type="submit" name="action" value ="translate_xliff" class="btn btn-primary">
