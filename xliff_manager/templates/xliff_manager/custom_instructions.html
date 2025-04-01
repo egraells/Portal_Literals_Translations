@@ -73,7 +73,7 @@ The AI translation is the original translation provided by the AI, and the Revie
     <tbody>
         {% for trans_unit_adjusted in translations_adjusted_by_reviewers %}
         <tr>
-            <td>{{ trans_unit_adjusted.salesforce_id }}</td>
+            <td class=".text-truncate">{{ trans_unit_adjusted.salesforce_id }}</td>
             <td> {{trans_unit_adjusted.request.business_user.first_name}} {{trans_unit_adjusted.request.business_user.last_name}}
             <td>
                 {% if trans_unit_adjusted.ai_translation is not None %}
