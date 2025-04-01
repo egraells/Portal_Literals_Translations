@@ -11,7 +11,7 @@ ROOT_FOLDER = "translations_requests" #Should be externalized with the one in vi
 class Languages(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
-    iso_value = models.CharField(max_length=10)
+    iso_value = models.CharField(max_length=10, null=True, blank=True)
     flag_url = models.URLField(max_length=200)
     emoji_flag = models.CharField(max_length=10, default="🌎")
 

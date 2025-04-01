@@ -20,6 +20,7 @@
                         <label for="_selected" class="form-label">Select the language:</label>
                         <select class="form-select" id="language_selected" name="language_selected" required>
                             {% for language in languages %}
+                                {{ language.name }}
                                 <option value="{{ language.id }}">{{ language.name }}</option>
                             {% endfor %}
                         </select>
