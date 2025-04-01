@@ -1,4 +1,7 @@
 django
 django-debug-toolbar
-schedule
 postmarker
+openai
+mistralai
+tenacity
+beautifulsoup4
