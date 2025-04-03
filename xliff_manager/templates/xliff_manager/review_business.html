@@ -16,19 +16,14 @@
   <div class="card">
     <div class="card-header"> Request Details</div>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item">{{review_request.technical_user.first_name}} {{review_request.technical_user.last_name}} requested
-          to {{ review_request.business_user.first_name }} {{ review_request.business_user.last_name }}
-          a review in <b>{{review_request.language.name}}</b>
-          on {{review_request.date_created |date:"Y/m/d"}} 
-          containing <b>{{translations | length}} translations</b>.</li>
-          {% if review_request.requester_comment or review_request.info_tag%}
-        <li class="list-group-item"><b>Comment:</b> <i>"{{review_request.requester_comment|default:'-'}}" </i>
-          {% endif %}
-          {% if review_request.info_tag%}
-          and <b> was Tagged as:</b> {{review_request.info_tag|default_if_none:'-'}}.</li>
-          {% endif %}
-        <li class="list-group-item"><b>Status:</b> 
-          </b> <span class="badge rounded-pill text-bg-light">{{review_request.status}}</span>
+        <li class="list-group-item">{{review_request.technical_user.first_name}} {{review_request.technical_user.last_name}} requested to you
+          to review <b>{{translations | length}} translations</b> for <b><span class="fi fi-{{ review_request.language.iso_value}}"></span> {{review_request.language.name}}</b>
+          on <b>{{review_request.date_created |date:"Y/m/d"}} </b>
+          saying: <b> <i>"{{review_request.requester_comment|default:'-'}}" </b></i>
+          and tagged this request as: <b>{{review_request.info_tag|default_if_none:'-'}}</b>.
+        </li>
+        <li class="list-group-item">The current status for this request is:
+          </b> <span class="badge rounded-pill text-bg-light">{{review_request.status}}</span>.
         </li>
       </ul>
   </div>

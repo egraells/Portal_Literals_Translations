@@ -135,9 +135,7 @@ def do_review_view(request, request_id):
 
     if request.method == 'POST':
         action = request.POST.get('action')
-
         if action == "save_changes":
-        
             # Extracting all editable translations and comments
             trans_units_to_update = []
             for key in request.POST:
@@ -171,6 +169,8 @@ def do_review_view(request, request_id):
                     action="Saved_Custom_Translations",
                     review_request_id = request_id,
                 )
+
+                #TODO : canviar l'status a Saved Translations
             
             return render(request, 'xliff_manager/review_business_confirmation.html', 
                 {'trans_units_updated': trans_units_to_update})
@@ -191,9 +191,9 @@ def do_review_view(request, request_id):
             
             LogDiary.objects.create(
                     user=request.user,
-                    action="Reviewer_Declines_Request",
+                    action="Declined_Request",
                     review_request_id = request_id,
-                    additional_info=f"{request_id}",
+                    additional_info=justification,
             )
             
             request_declined = ReviewRequests.objects.get(id=request_id)
@@ -294,7 +294,7 @@ def request_translation_view(request):
 
             LogDiary.objects.create(
                 user = request.user, 
-                action = "Requester_Request_Translation_to_AI",
+                action = "Requested_Translation_to_AI",
                 translation_request_id = f"{trans_request.id}",
             )
 
@@ -320,7 +320,7 @@ def choose_review_view(request):
         
             LogDiary.objects.create(
                 user=request.user,
-                action="Reviewer_Visualizes_Request",
+                action="Visualizes_Request",
                 review_request_id=request_selected_id,
             )
             
@@ -341,17 +341,15 @@ def send_email(recipient: str, subject: str, body: str):
 def request_review_view(request):
     if request.method == 'GET':
         tags_used = ReviewRequests.objects.values_list('info_tag', flat=True).distinct()
-        users = User.objects.values('id', 'first_name', 'last_name')
+        reviewers = User.objects.filter(groups__name='Reviewer').values('id', 'first_name', 'last_name')
         return render(request, 'xliff_manager/request_review.html',
-            {'users': users,
+            {'reviewers': reviewers,
              'languages': Languages.objects.all(),
              'tags_used': tags_used})
                            
     if request.method == 'POST':
         action = request.POST.get('action')
-
         if action == 'request_business_review':
-
             if request.FILES['xliff_translations_file'] and request.POST.get('business_reviewer'):
                 language_selected = request.POST.get('language')
                 language_id = Languages.objects.get(id=language_selected).id
@@ -400,7 +398,8 @@ def request_review_view(request):
                 # Log the action in the LogDiary
                 LogDiary.objects.create(
                     user=request.user,
-                    action="Requester_Requests_Business_Review",
+                    user_requested = business_reviewer,
+                    action="Requested_Business_Review",
                     review_request_id=f"{review_request.id}",
                 )
 
@@ -473,9 +472,8 @@ def custom_instructions_view(request):
 
         # Log the action in the LogDiary
         LogDiary.objects.create(
-            user=request.user,
-            action="Saved_Custom_Instructions",
-            date=timezone.now(),
+            user = request.user,
+            action = "Saved_Custom_Instructions",
         )
         
         return render(request, 'xliff_manager/custom_instructions_confirmation.html', {'num_records': len(custom_instructions)})

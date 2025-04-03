@@ -30,7 +30,7 @@
         <tr>
             <th scope="col">Language</th>
             <th scope="col">Instructions (these will be used during the AI generation, and will influence the results)</th>
-            <th scope="col">By</th>
+            <th scope="col">Last Updater</th>
         </tr>
     </thead>
     <tbody>
@@ -48,7 +48,11 @@
             </td>
             <td>{{ instruction.user_last_modification.first_name }} 
                 {{ instruction.user_last_modification.last_name }} 
-                {{ instruction.date_last_modification|date:"Y/m/d" }}</td>
+                <span class="badge text-bg-warning rounded-pill">
+                    <i class="bi bi-calendar-date"></i>
+                    {{ instruction.date_last_modification|date:"Y/m/d" }} 
+                </span>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

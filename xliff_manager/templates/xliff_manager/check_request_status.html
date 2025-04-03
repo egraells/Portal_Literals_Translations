@@ -37,13 +37,13 @@
                         <td><span class="fi fi-{{ request.language.iso_value}}"></span>
                             {{ request.language.name }}</td>
                         <td>{{ request.request_user.first_name }} {{ request.request_user.last_name }}</td>
-                        <td><span class="badge rounded-pill text-bg-primary">
-                            {% if request.status == "Created"%}
-                                <i class="bi bi-1-circle"></i> Created
-                            {% else %}
-                                <i class="bi bi-2-circle"></i> AI translation ready
-                            {% endif %}
-                        </span></td>
+                        {% if request.status == "Declined" %}
+                            <td><span class="badge rounded-pill text-bg-danger">{{request.status}}</span></td> 
+                         {%elif request.status == "Reviewed" %}
+                             <td><span class="badge rounded-pill text-bg-success">{{request.status}}</span></td> 
+                         {% else %}
+                             <td><span class="badge rounded-pill text-bg-primary">{{request.status}}</span></td> 
+                         {% endif %}
                         <td>{{ request.date_created|date:"Y/m/d" }}</td>
                         <td>{{ request.date_received_from_llm|date:"Y/m/d" }}</td>
                         <td><a href="{% url 'download_file' type='translations_request_original_file' id=request.id file_to_download=request.source_xliff_file.name %}" 
@@ -61,7 +61,7 @@
                 </tbody>
             </table>
 
-        <h2 style="margin-top: 50px"> Reviews requested to Business Experts</h5>
+        <h2 style="margin-top: 50px"> Reviews requested to Business experts</h5>
         <p class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"></i> Created</p> meaning is pending the Reviewer. <br>
         <p class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"></i> Reviewed</p> meaning the Reviewer already reviewed the translations and the file is ready to be downloaded and uploaded to Salesforce.
             
@@ -69,54 +69,46 @@
             <thead>
                 <tr class="text-center">
                     <th scope="col" style="width:1%">Request Id</th>
-                    <th scope="col">Requester to Reviewer</th>
+                    <th scope="col">Requester & Reviewer</th>
                     <th scope="col">Language</th>
                     <th scope="col">Status</th>
                     <th scope="col">Requested Date</th>
                     <th scope="col"><i class="bi bi-tag"></i>Tag</th>
                     <th scope="col">Date Reviewed</th>
-                    <th scope="col"></i>Requester Comments</th>
-                    <th scope="col"></i>Reviewer Comments</th>
                     <th scope="col"></i>Requester file</th>
-                    <th scope="col"></i>Business Reviewed</th>
+                    <th scope="col"></i>Business Reviewed file</th>
                 </tr>
             </thead>
             <tbody class="table-group-divider">
                 {% for request in review_requests %}
                 <tr class="text-center">
                     <td >{{ request.id }}</td>
-                    <td style="font-size: smaller;">{{ request.technical_user.first_name }}  
-                        <i class="bi bi-arrow-right-square-fill" style="color:#ffc107;"></i>
-                        {{ request.business_user.first_name }} </td>
-                    <td>{{ request.language.name }}</td>
-                    <td><span class="badge rounded-pill text-bg-primary">
-                        {% if request.status == "Created"%}
-                            <i class="bi bi-1-circle"></i> Created
-                        {% else %}
-                            <i class="bi bi-2-circle"></i> Reviewed
-                        {% endif %}
-                    </span></td> 
-                    <td>{{ request.date_created|date:"Y/m/d" }}</td>
-                    <td style="font-size: smaller;">{{ request.info_tag|default_if_none:"-" }}</td>
-                    <td>{{ request.date_reviewed_by_business|date:"Y/m/d" }}</td>
-                    <td>
-                        {% if request.requester_comment is not None and request.requester_comment != ''%}
-                            <button type="button" class="btn btn-sm btn-light" 
+                    <td style="font-size: smaller;">
+                        {{ request.technical_user.first_name }} {{ request.technical_user.last_name }} <i class="bi bi-arrow-right-square-fill" style="color:#ffc107;"></i>
+                        {{ request.business_user.first_name }} {{ request.business_user.last_name }} 
+                        <br>
+                        <button type="button" class="btn btn-sm btn-light" 
                             data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
-                            title="{{ request.requester_comment }}"><i class="bi bi-chat-dots"></i> Comments</button>
-                        {%else%}
-                        {% endif %}
+                            title="{{ request.requester_comment|default:"None" }}"><i class="bi bi-chat-dots"></i> {{ request.technical_user.first_name }} Comments</button>
+                        <button type="button" class="btn btn-sm btn-light" 
+                            data-bs-toggle="tooltip" data-bs-placement="top"
+                            data-bs-custom-class="custom-tooltip"
+                            title="{{ request.reviewer_comment|default:"None" }}"><i class="bi bi-chat-dots"></i> {{ request.business_user.first_name }} Comments</button>
                     </td>
-                    <td>
-                        {% if request.reviewer_comment is not None %}
-                            <button type="button" class="btn btn-sm btn-light" 
-                            data-bs-toggle="tooltip" data-bs-placement="top"
-                            data-bs-custom-class="custom-tooltip"
-                            title="{{ request.reviewer_comment }}"><i class="bi bi-chat-dots"></i> Comments</button>
-                        {%else%} 
-                        {% endif %}
-                        </td>
+                    <td style="font-size: smaller;">
+                        <span class="fi fi-{{ request.language.iso_value}}"></span> {{ request.language.name }}
+                    </td>
+                    {% if request.status == "Declined" %}
+                    <td><span class="badge rounded-pill text-bg-danger">{{request.status}}</span></td> 
+                    {%elif request.status == "Reviewed" %}
+                        <td><span class="badge rounded-pill text-bg-success">{{request.status}}</span></td> 
+                    {% else %}
+                        <td><span class="badge rounded-pill text-bg-primary">{{request.status}}</span></td> 
+                    {% endif %} 
+                    <td style="font-size: smaller;">{{ request.date_created|date:"Y/m/d" }}</td>
+                    <td style="font-size: smaller;">{{ request.info_tag|default_if_none:"-" }}</td>
+                    <td style="font-size: smaller;">{{ request.date_reviewed_by_business|date:"Y/m/d"|default:"Not yet Reviewed" }}</td>
                     <td>
                         <a href="{% url 'download_file' type='review_request_source_file' id=request.id file_to_download=request.target_xliff_file %}" 
                             class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
@@ -126,10 +118,10 @@
                             <a href="{% url 'download_file' type='review_request_target_file' id=request.id file_to_download=request.target_xliff_file %}"
                             class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
                         {% else %}
-                            Not Reviewed yet
+                            Not yet Reviewed
                         {% endif %}    
                     </td>
-                    </tr>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>

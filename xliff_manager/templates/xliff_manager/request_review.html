@@ -1,6 +1,5 @@
 {% extends 'base_template.html' %}
 
-
 {% block body %}
 <h1 class="mb-4">
     <i class="bi bi-ui-checks"></i>
@@ -9,7 +8,6 @@
 
 <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
 <a href="{% url 'check_request_status' %}" class="btn btn-primary">Check Requests Status</a>
-
 
 <div class="row" style="margin-top: 15px">
     <div class="col-md-9">
@@ -48,11 +46,11 @@
                     </div>
                     <div class="mb-3">
                         <h6>Business Reviewer</h6>
-                        <label for="business_reviewer" class="form-label">Choose the reviewer for this translations:</label>
+                        <label for="business_reviewer" class="form-label">Choose the reviewer for these translations:</label>
                         <select class="form-select" id="business_reviewer" name="business_reviewer" required>
-                            {% for user in users %}
-                                {{user.id}}
-                                <option value="{{user.id}}">{{ user.first_name}} {{user.last_name }}</option>
+                            {% for reviewer in reviewers %}
+                                {{reviewer.id}}
+                                <option value="{{reviewer.id}}">{{ reviewer.first_name}} {{reviewer.last_name }}</option>
                             {% endfor %}
                         </select>
                     </div>

@@ -106,13 +106,14 @@ class Translations_Units(models.Model):
 
 class LogDiary(models.Model):
     class Action(models.TextChoices): 
-        Requester_Request_Translation_to_AI = 'RRTTLLM', 'Requester_Request_Translation_to_AI'   
+        Requested_Translation_to_AI = 'RRTTLLM', 'Requested_Translation_to_AI'   
         TRANSLATION_RECEIVED_FROM_LLM = 'TRFLLM', 'Translation_Received_from_LLM'  
         EN_REVISIO = 'RV', 'REvision'
     
     id = models.AutoField(primary_key=True)
     date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_requested = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviewer', null=True, blank=True) 
     action = models.CharField(max_length=100) 
     review_request_id = models.IntegerField(null=True, blank=True)
     translation_request_id = models.IntegerField(null=True, blank=True)
@@ -129,27 +130,31 @@ class LogDiary(models.Model):
     
     def save(self, *args, **kwargs):
 
+        date_format = None
+        if self.date is not None:
+            date_format = {self.date.strftime('%Y-%m-%d %H:%M')}
+
         match self.action:
-            case "Requester_Request_Translation_to_AI":
-                self.description = f"Translation requested (Translation Id Generated: {self.translation_request_id}) - Additional Info: {self.additional_info}"
+            case "Requested_Translation_to_AI":
+                self.description = f"{self.additional_info}"
             case "Translation_Received_from_LLM":
-                self.description = f"Translation received from LLM (Translation id: {self.translation_request_id})  - Additional Info: {self.additional_info}"
-            case "Requester_Requests_Business_Review":
-                self.description = f"Review requested (Review Id generated: {self.review_request_id}) by {self.user} at {self.date}  - Additional Info: {self.additional_info}"
-            case "Reviewer_Visualizes_Request":
-                self.description = f"Review visualized (Review Id: {self.review_request_id}) by {self.user} at {self.date}  - Additional Info: {self.additional_info}"
-            case "Reviewer_Declines_Request":
-                self.description = f"Review declined (Review Id: {self.review_request_id}) by {self.user} at {self.date}  - Additional Info: {self.additional_info}"
+                self.description = f"{self.additional_info}"
+            case "Requested_Business_Review":
+                self.description = f"{self.additional_info}"
+            case "Visualizes_Request":
+                self.description = f"{self.additional_info}"
+            case "Declined_Request":
+                self.description = f"{self.additional_info}"
             case "Review_Marked_as_Reviewed":
-                self.description = f"Review marked as reviewed (Review Id: {self.review_request_id}) by {self.user} at {self.date}  - Additional Info: {self.additional_info}"
+                self.description = f"{self.additional_info}"
             case "Requester_Downloaded_Review":
-                self.description = f"Review file downloaded (Review Id: {self.review_request_id}) by {self.user} at {self.date}  - Additional Info: {self.additional_info}"
+                self.description = f"{self.additional_info}"
             case "Saved_Custom_Translations":
-                self.description = f"Translations saved {self.user} at {self.date} - Additional Info: {self.additional_info}"
+                self.description = f"{self.additional_info}"
             case "Saved_Custom_Instructions":
-                self.description = f"Custom instructions saved by {self.user.first_name} at {self.date} - Additional Info: {self.additional_info if self.additional_info else ''}"    
+                self.description = f"{self.additional_info}"   
             case _:
-                self.description = f"Unknown action: {self.action} at {self.date}  - Additional Info: {self.additional_info}"
+                self.description = f"Unknown action: {self.action} at {date_format}  - Additional Info: {self.additional_info}"
         
         super().save(*args, **kwargs)
 
