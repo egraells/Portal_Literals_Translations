@@ -1,0 +1,6 @@
+{
+	"SECRET_KEY": "django-insecure-mhgt#4+)!(ck=)!2adbapjq-ny@da7m0_i#zy4l=h(ur*sq9q-",
+	"TRANS_REQUESTS_FOLDER": "translations_requests",
+    "settings.SEND_EMAILS": false,
+	"EMAIL_HOST":""
+}

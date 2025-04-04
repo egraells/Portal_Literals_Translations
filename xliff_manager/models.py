@@ -3,9 +3,7 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
-
-ROOT_FOLDER = "translations_requests" #Should be externalized with the one in views.py
-
+from django.conf import settings
 
 # Create your models here.
 class Languages(models.Model):
@@ -24,7 +22,7 @@ class TranslationsRequests(models.Model):
         #This function is not strictly necessary in this form, 
         # but it is useful to have it in case we need to change 
         # the folder structure in the future
-        return os.path.join(ROOT_FOLDER, filename)
+        return os.path.join(settings.TRANS_REQUESTS_FOLDER, filename)
     
     id = models.AutoField(primary_key=True)
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
@@ -76,8 +74,8 @@ class TranslationsRequests(models.Model):
 class ReviewRequests(models.Model):
     id = models.AutoField(primary_key=True)
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
-    technical_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='technical_requester', null=False, blank=False) #TODO
-    business_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='business_receiver', null=False, blank=False) #TODO
+    technical_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='technical_requester', null=False, blank=False) 
+    business_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='business_receiver', null=False, blank=False) 
     target_xliff_file = models.FileField(upload_to='review_requests', blank=False)
     info_tag = models.TextField(null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -101,7 +99,7 @@ class Translations_Units(models.Model):
     date_reviewed = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.language} - {self.release}"
+        return f"{self.language} - {self.salesforce_id} - {self.source} - {self.ai_translation} - {self.reviewer_translation} - {self.date_ingested} - {self.date_reviewed}"
 
 
 class LogDiary(models.Model):

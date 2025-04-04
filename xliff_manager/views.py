@@ -2,25 +2,26 @@ import os
 import shutil
 from datetime import datetime
 import xml.etree.ElementTree as ET
-from dotenv import load_dotenv
 
-from django.shortcuts import render, redirect
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django.http import HttpResponse
-from django.contrib.auth.models import User
 from django.http import FileResponse, HttpResponse
-from django.contrib.auth import logout
+from django.shortcuts import render, redirect
+
+from django.core.files.storage import FileSystemStorage
 
 from .models import Languages, TranslationsRequests, Translations_Units, ReviewRequests, LogDiary, CustomInstructions
 
 from postmarker.core import PostmarkClient
 
-ROOT_FOLDER = os.getenv("ROOT_FOLDER")
-SEND_EMAILS = os.getenv("SEND_EMAILS")
+timespan = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+settings.LOGGER.debug(f"[{timespan}] From settings.py TRANS_REQUESTS_FOLDER: {settings.TRANS_REQUESTS_FOLDER}, settings.SEND_EMAILS: {settings.SEND_EMAILS}")
 
 def userpage(request):
     return render(request, 'xliff_manager/userpage.html')
@@ -58,7 +59,8 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
     
     if request.method == 'GET' and \
         (type in ["review_request_source_file", "review_request_target_file", "translations_request_AItranslated_file"]):
-        file_path = os.path.join('review_requests', str(id), file_to_download)
+        file_path = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(id), file_to_download)
+        settings.LOGGER.debug(f"[{timespan}] File path to download: {file_path}")
         if os.path.exists(file_path):
             with open(file_path, 'rb') as f:
                 response = HttpResponse(f.read(), content_type='application/force-download')
@@ -68,7 +70,8 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
             return HttpResponse("File not found", status=404)
     
     if request.method == 'GET' and type == 'translations_request_original_file':
-        file_path = os.path.join('translations_requests', str(id), file_to_download)
+        file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
+        settings.LOGGER.debug(f"[{timespan}] File path to download: {file_path}")
         if os.path.exists(file_path):
             with open(file_path, 'rb') as f:
                 response = HttpResponse(f.read(), content_type='application/force-download')
@@ -78,7 +81,8 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
             return HttpResponse("File not found", status=404)
     
     if request.method == 'GET' and type == 'translations_request_AItranslated_file_confirmed':
-        file_path = os.path.join('translations_requests', str(id), file_to_download)
+        file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
+
         if os.path.exists(file_path):
             with open(file_path, 'rb') as f:
                 response = HttpResponse(f.read(), content_type='application/force-download')
@@ -243,7 +247,6 @@ def do_review_view(request, request_id):
 def request_translation_view(request):
 
     if request.method == 'GET':
-        
         return render(request, 'xliff_manager/request_llm_translation.html', 
             {'languages': Languages.objects.all(),}
         )
@@ -253,42 +256,40 @@ def request_translation_view(request):
         
         if action == 'translate_xliff':
             language_id = request.POST.get('language_selected')
+            
+            language_id = request.POST.get('language_selected')
+            source_xliff_file = request.FILES['xliff_source_file']
+            literals_to_exclude_file = request.FILES.get('literal_ids_to_exclude_file')
+            literalpatterns_to_exclude_file = request.FILES.get('literal_patterns_to_exclude_file')
 
-            # Sanity check: Delete all files in the translations_requests folder
-            for filename in os.listdir(ROOT_FOLDER):
-                file_path = os.path.join(ROOT_FOLDER, filename)
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
 
             trans_request = TranslationsRequests(
                 language = Languages.objects.get(id=language_id),
                 request_user = request.user,
-                source_xliff_file = request.FILES['xliff_source_file'],
-                target_xliff_file_name = request.FILES['xliff_source_file'].name + '_translated.xlf',
-                literals_to_exclude_file = request.FILES['literal_ids_to_exclude_file'] if 'literal_ids_to_exclude_file' in request.FILES else None,
-                literalpatterns_to_exclude_file = request.FILES['literal_patterns_to_exclude_file'] if 'literal_patterns_to_exclude_file' in request.FILES else None,
+                source_xliff_file = source_xliff_file.name, 
+                target_xliff_file_name = source_xliff_file.name + '_translated.xlf',
+                literals_to_exclude_file = literals_to_exclude_file.name if literals_to_exclude_file else None,
+                literalpatterns_to_exclude_file = literalpatterns_to_exclude_file.name if literalpatterns_to_exclude_file else None,
             )
             trans_request.save()
 
-            # Move files this request to the folder with the Id 
-            dest_folder = os.path.join(ROOT_FOLDER, str(trans_request.id)) 
-            os.makedirs(dest_folder, exist_ok=True)
+            # Create a FileSystemStorage instance for the upload directory within MEDIA_ROOT
+            location = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(trans_request.id))
+            settings.LOGGER.debug(f"[{timespan}] Upload dir: {location}")
+            fs = FileSystemStorage(location=location, base_url=settings.MEDIA_URL + location + '/')
 
-            source_xliff_file_only_name = os.path.basename(trans_request.source_xliff_file.name)
-            shutil.move(trans_request.source_xliff_file.name, os.path.join(dest_folder, source_xliff_file_only_name))
-            trans_request.source_xliff_file = source_xliff_file_only_name
-            
-            if trans_request.literals_to_exclude_file:
-                exclude_file_name_only = os.path.basename(trans_request.literals_to_exclude_file.name)
-                shutil.move(os.path.join(ROOT_FOLDER, exclude_file_name_only), 
-                            os.path.join(dest_folder, exclude_file_name_only))
-                trans_request.literals_to_exclude_file = exclude_file_name_only
-            
-            if trans_request.literalpatterns_to_exclude_file:
-                exclude_patterns_file_name_only = os.path.basename(trans_request.literalpatterns_to_exclude_file.name)
-                shutil.move(os.path.join(ROOT_FOLDER, exclude_patterns_file_name_only), 
-                            os.path.join(dest_folder, exclude_patterns_file_name_only))
-                trans_request.literalpatterns_to_exclude_file = exclude_patterns_file_name_only
+            # Save the files to the upload directory
+            if source_xliff_file:
+                source_xliff_filename = fs.save(source_xliff_file.name, source_xliff_file)
+                trans_request.source_xliff_file = source_xliff_filename
+
+            if literals_to_exclude_file:
+                exclude_filename = fs.save(literals_to_exclude_file.name, literals_to_exclude_file)
+                trans_request.literals_to_exclude_file = exclude_filename
+
+            if literalpatterns_to_exclude_file:
+                exclude_patterns_filename = fs.save(literalpatterns_to_exclude_file.name, literalpatterns_to_exclude_file)
+                trans_request.literalpatterns_to_exclude_file = exclude_patterns_filename
 
             trans_request.save()
 
@@ -328,7 +329,7 @@ def choose_review_view(request):
 
 @login_required
 def send_email(recipient: str, subject: str, body: str):
-    if SEND_EMAILS:
+    if settings.SEND_EMAILS:
         postmark = PostmarkClient(server_token='fa9cda4a-0124-4b7a-9ad3-aadf18636cae')
         postmark.emails.send(
         From='esteve.graells@novartis.com',
@@ -370,18 +371,22 @@ def request_review_view(request):
                 )
                 review_request.save()
 
-                # When saving the file, we need to move it to the review_requests concret folder
-                review_request = ReviewRequests.objects.get(pk=review_request.pk)
-                dest_folder = os.path.join('review_requests', str(review_request.id))
-                dest_name = os.path.join(dest_folder, original_xliff_file_name)
-                os.makedirs(dest_folder, exist_ok=True)
-                shutil.move(review_request.target_xliff_file.name, dest_name)
+                # Create a FileSystemStorage instance for the upload directory within MEDIA_ROOT
+                upload_dir = os.path.join('review_requests', str(review_request.id))
+                fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, upload_dir), base_url=settings.MEDIA_URL + upload_dir + '/')
+
+                # Save the uploaded file
+                target_xliff_filename = fs.save(uploaded_xliff_file.name, uploaded_xliff_file)
+                review_request.target_xliff_file = target_xliff_filename
+                review_request.save()
+
+                dest_name = os.path.join(settings.MEDIA_ROOT, upload_dir, target_xliff_filename)
+
+                trans_units, language_xliff_file = read_xliff_file(dest_name)
 
                 review_request.target_xliff_file = original_xliff_file_name
                 review_request.save()
 
-                trans_units, language_xliff_file = read_xliff_file(dest_name)
-                
                 # Save the translations to the database
                 for unit in trans_units:
                     Translations_Units.objects.create(
@@ -398,7 +403,7 @@ def request_review_view(request):
                 # Log the action in the LogDiary
                 LogDiary.objects.create(
                     user=request.user,
-                    user_requested = business_reviewer,
+                    user_requested=User.objects.get(id=business_reviewer),
                     action="Requested_Business_Review",
                     review_request_id=f"{review_request.id}",
                 )
@@ -481,5 +486,3 @@ def custom_instructions_view(request):
 
 def confirm_insertion_view(request, num_records):
     return render(request, 'xliff_manager/confirm_insertion.html', {'num_records': num_records})
-
-

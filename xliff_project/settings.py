@@ -10,14 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-import os
-from dotenv import load_dotenv
+import os, json, logging, platform
 from pathlib import Path
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-MEDIA_ROOT = BASE_DIR 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
+MEDIA_URL = 'media/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -25,25 +24,30 @@ MEDIA_ROOT = BASE_DIR
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = 'static/'
 
-# Load environment variables
-load_dotenv()
-ROOT_FOLDER = os.getenv("ROOT_FOLDER")
-print(f"ROOT_FOLDER: {ROOT_FOLDER}")
+# Detects the operating system and selects the config file accordingly
+system = platform.system() 
+if system == "Windows" or system == "Darwin": 
+    CONFIG_FILE = os.path.join(BASE_DIR, 'config.json') 
+elif system == "Linux": 
+    CONFIG_FILE = os.path.join(BASE_DIR, 'config.json') 
 
-EMAIL_HOST = os.getenv("EMAIL_HOST")
-SEND_EMAILS = os.getenv("SEND_EMAILS")
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-mhgt#4+)!(ck=)!2adbapjq-ny@da7m0_i#zy4l=h(ur*sq9q-'
+# Load environment variables from Json file (instead of .env file to deploy easier on Appache)
+with open(CONFIG_FILE) as config_file:
+    config = json.load(config_file)
+    
+TRANS_REQUESTS_FOLDER = config['TRANS_REQUESTS_FOLDER']
+SEND_EMAILS = config['settings.SEND_EMAILS']
+SECRET_KEY = config['SECRET_KEY']
+#EMAIL_HOST = config['EMAIL_HOST']
+#EMAIL_HOST_USER = config['EMAIL_HOST_USER']
+#EMAIL_HOST_PASSWORD = config['EMAIL_HOST_PASSWORD']
+#EMAIL_PORT = config['EMAIL_PORT']
+#EMAIL_USE_TLS = config['EMAIL_USE_TLS']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['5.250.191.27', '127.0.0.1']
-
+ALLOWED_HOSTS = ['www.sibilai.com','172.104.132.163', '127.0.0.1']
 
 # Application definition
 
@@ -141,3 +145,26 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'app_portal.log'),  # Replace with your desired path
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console', 'file'], #Log to both console and file.
+            'level': 'DEBUG',
+        },
+    },
+}
+
+#Logger parameters are defined at the end of this file
+LOGGER = logging.getLogger(__name__)

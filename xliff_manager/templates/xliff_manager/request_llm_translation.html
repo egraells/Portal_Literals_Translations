@@ -12,7 +12,7 @@
     <div class="col-md-9">
         <div class="card">
             <div class="card-body">
-                <h5>✨ Translate an XLIFF file</h5>
+                <h5>Translate an XLIFF file</h5>
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="mb-3">
@@ -29,21 +29,21 @@
                         <h6>File to be translated</h6>
                         <div class="mb-3">
                             <h6>Upload the translations file </h6>
-                            <label for="xliff_source_file" class="form-label">Upload the file and name the Release to be reviewed by the business team.</label>
+                            <label for="xliff_source_file" class="form-label">Upload the XLIFF file to translate</label>
                             <input type="file" class="form-control" id="xliff_source_file" name="xliff_source_file" required>
                         </div>
                     </div>
                     <div class="mb-3">
                         <h6>File with literals to be excluded</h6>
                         <div class="mb-3">
-                            <label for="literal_ids_to_exclude_file" class="form-label">Upload the file and name the Release to be reviewed by the business team.</label>
+                            <label for="literal_ids_to_exclude_file" class="form-label">Upload the file with the ids that will not be translated</label>
                             <input type="file" class="form-control" id="literal_ids_to_exclude_file" name="literal_ids_to_exclude_file" >
                         </div>
                     </div>
                     <div class="mb-3">
                         <h6>Exclusion patterns</h6>
                         <div class="mb-3">
-                            <label for="literal_patterns_to_exclude_file" class="form-label">Upload the file and name the Release to be reviewed by the business team.</label>
+                            <label for="literal_patterns_to_exclude_file" class="form-label">Upload the file with the id patterns that will not be translated</label>
                             <input type="file" class="form-control" id="literal_patterns_to_exclude_file" name="literal_patterns_to_exclude_file">
                         </div>
                     </div>
