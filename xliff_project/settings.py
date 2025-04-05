@@ -28,6 +28,7 @@ STATIC_URL = 'static/'
 system = platform.system() 
 if system == "Windows" or system == "Darwin": 
     CONFIG_FILE = os.path.join(BASE_DIR, 'config.json') 
+# Just in case we need to deploy on /etc as in the video
 elif system == "Linux": 
     CONFIG_FILE = os.path.join(BASE_DIR, 'config.json') 
 
@@ -36,8 +37,9 @@ with open(CONFIG_FILE) as config_file:
     config = json.load(config_file)
     
 TRANS_REQUESTS_FOLDER = config['TRANS_REQUESTS_FOLDER']
-SEND_EMAILS = config['settings.SEND_EMAILS']
+SEND_EMAILS = config['SEND_EMAILS']
 SECRET_KEY = config['SECRET_KEY']
+# For future use
 #EMAIL_HOST = config['EMAIL_HOST']
 #EMAIL_HOST_USER = config['EMAIL_HOST_USER']
 #EMAIL_HOST_PASSWORD = config['EMAIL_HOST_PASSWORD']
