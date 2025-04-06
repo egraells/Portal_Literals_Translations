@@ -154,6 +154,10 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+        },
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
@@ -164,6 +168,11 @@ LOGGING = {
         '': {
             'handlers': ['console', 'file'], #Log to both console and file.
             'level': 'DEBUG',
+            'django.request': {
+                'handlers': ['mail_admins'],
+                'level': 'ERROR',
+                'propagate': True,
+             },
         },
     },
 }
