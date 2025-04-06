@@ -39,12 +39,12 @@ with open(CONFIG_FILE) as config_file:
 TRANS_REQUESTS_FOLDER = config['TRANS_REQUESTS_FOLDER']
 SEND_EMAILS = config['SEND_EMAILS']
 SECRET_KEY = config['SECRET_KEY']
-# For future use
-#EMAIL_HOST = config['EMAIL_HOST']
-#EMAIL_HOST_USER = config['EMAIL_HOST_USER']
-#EMAIL_HOST_PASSWORD = config['EMAIL_HOST_PASSWORD']
+# For sending 
+EMAIL_HOST = config['EMAIL_HOST']
+EMAIL_HOST_USER = config['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = config['EMAIL_HOST_PASSWORD']
 #EMAIL_PORT = config['EMAIL_PORT']
-#EMAIL_USE_TLS = config['EMAIL_USE_TLS']
+EMAIL_USE_TLS = config['EMAIL_USE_TLS']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
