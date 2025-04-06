@@ -20,6 +20,9 @@ from .models import Languages, TranslationsRequests, Translations_Units, ReviewR
 
 from postmarker.core import PostmarkClient
 
+from django.core.mail import send_mail
+send_mail('Test', 'This is a test', 'esteve.graells@gmail.com',['SOMEONEELSE@BLAH'],fail_silently=False)
+
 timespan = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 settings.LOGGER.debug(f"[{timespan}] From settings.py TRANS_REQUESTS_FOLDER: {settings.TRANS_REQUESTS_FOLDER}, settings.SEND_EMAILS: {settings.SEND_EMAILS}")
 
