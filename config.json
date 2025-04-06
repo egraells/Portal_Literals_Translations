@@ -2,9 +2,9 @@
 	"SECRET_KEY": "django-insecure-mhgt#4+)!(ck=)!2adbapjq-ny@da7m0_i#zy4l=h(ur*sq9q-",
 	"TRANS_REQUESTS_FOLDER": "translations_requests",
   "SEND_EMAILS": True,
-	"EMAIL_USE_TLS" = True
+	"EMAIL_USE_TLS" = True,
 "EMAIL_HOST" = 'smtp.gmail.com'
-"EMAIL_HOST_USER" = 'esteve.graells@gmail.com'
-"EMAIL_HOST_PASSWORD" = 'despertaferro23'
+"EMAIL_HOST_USER" = 'esteve.graells@gmail.com',
+"EMAIL_HOST_PASSWORD" = 'despertaferro23',
 "EMAIL_PORT" = 587
 }
