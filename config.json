@@ -1,10 +1,10 @@
 {
 	"SECRET_KEY": "django-insecure-mhgt#4+)!(ck=)!2adbapjq-ny@da7m0_i#zy4l=h(ur*sq9q-",
 	"TRANS_REQUESTS_FOLDER": "translations_requests",
-	"SEND_EMAILS" : true,
-	"EMAIL_USE_TLS" : true,
-	"EMAIL_HOST" : "smtp.gmail.com",
-	"EMAIL_HOST_USER" : "elsgraells@gmail.com",
-	"EMAIL_HOST_PASSWORD" : "som4copitos!",
-	"EMAIL_PORT" : 587
+	"SEND_EMAILS" : false,
+	"EMAIL_HOST" : "smtp.protonmail.com",
+	"EMAIL_HOST_USER" : "esteve.graells@proton.me",
+	"EMAIL_HOST_PASSWORD" : "", 
+	"EMAIL_PORT" : 1026,
+	"EMAIL_USE_TLS" : true
 }

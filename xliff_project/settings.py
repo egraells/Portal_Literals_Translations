@@ -37,9 +37,9 @@ with open(CONFIG_FILE) as config_file:
     config = json.load(config_file)
     
 TRANS_REQUESTS_FOLDER = config['TRANS_REQUESTS_FOLDER']
-SEND_EMAILS = config['SEND_EMAILS']
 SECRET_KEY = config['SECRET_KEY']
 # For sending 
+SEND_EMAILS = config['SEND_EMAILS']
 EMAIL_HOST = config['EMAIL_HOST']
 EMAIL_HOST_USER = config['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = config['EMAIL_HOST_PASSWORD']
@@ -49,7 +49,7 @@ EMAIL_USE_TLS = config['EMAIL_USE_TLS']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.sibilai.com','172.104.132.163', '127.0.0.1']
+ALLOWED_HOSTS = ['www.estevegraells.com','172.104.132.163', '127.0.0.1']
 
 # Application definition
 
