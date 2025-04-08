@@ -175,16 +175,11 @@ def do_review_view(request, request_id):
             # Bulk update all records at once and update the Request Review date
             if trans_units_to_update:
                 Translations_Units.objects.bulk_update(trans_units_to_update, ["reviewer_translation", "reviewer_comment", "date_reviewed"])
-                ReviewRequests.objects.filter(id=request_id).update(date_reviewed_by_business = timezone.now())
-                # Log the action in the LogDiary
-                LogDiary.objects.create(
-                    user=request.user,
-                    action="Saved_Custom_Translations",
-                    review_request_id = request_id,
-                )
+                ReviewRequests.objects.filter(id=request_id).update(date_reviewed_by_business = timezone.now(), status = 'Saved_Custom_Translations' )
 
-                #TODO : canviar l'status a Saved Translations
-            
+                # Log the action in the LogDiary
+                LogDiary.objects.create(user=request.user, action="Saved_Custom_Translations", review_request_id = request_id)
+
             return render(request, 'xliff_manager/review_business_confirmation.html', 
                 {'trans_units_updated': trans_units_to_update})
 
