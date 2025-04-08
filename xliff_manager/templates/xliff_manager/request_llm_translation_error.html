@@ -1,0 +1,19 @@
+{% extends 'base_template.html' %}
+
+{% block body %}
+
+    <h1 class="mb-4">An error has occured when validating the XLIFF file</h1>
+
+    <div class="alert alert-danger" role="danger" style="margin-top: 20px;">    
+        <p>The XLIFF file you uploaded is either invalid or empty.</p>
+        Please review the file and try again.
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+            <a href="{% url 'check_request_status' %}" class="btn btn-primary">Check Requests Status</a>
+        </div>
+    </div>
+
+{% endblock %}

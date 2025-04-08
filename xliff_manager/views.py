@@ -21,8 +21,9 @@ from .models import Languages, TranslationsRequests, Translations_Units, ReviewR
 from postmarker.core import PostmarkClient
 
 from django.core.mail import send_mail
+
 if settings.SEND_EMAILS:
- send_mail('Test', 'This is a test', 'esteve.graells@proton.me',['esteve.graells@gmail.com'],fail_silently=False)
+    send_mail('Test', 'This is a test', 'esteve.graells@proton.me',['esteve.graells@gmail.com'],fail_silently=False)
 
 timespan = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 settings.LOGGER.debug(f"[{timespan}] From settings.py TRANS_REQUESTS_FOLDER: {settings.TRANS_REQUESTS_FOLDER}, settings.SEND_EMAILS: {settings.SEND_EMAILS}")
@@ -114,21 +115,25 @@ def download_file_confirmed(request):
                 return HttpResponse("File not found", status=404)
 
 def read_xliff_file(xliff_file):
-    tree = ET.parse(xliff_file)
-    root = tree.getroot()
-    
-    trans_units = []
-    for unit in root.findall(".//trans-unit"):
-        id = unit.get('id')
-        source = unit.find('source').text
-        target = unit.find('target').text
-        trans_units.append({'id': id, 'source': source, 'target': target})
-    
-    file_element = root.find('file')  
-    if file_element is not None:
-        target_language = file_element.get('target-language')
-    
-    return trans_units, target_language
+    try: 
+        tree = ET.parse(xliff_file)
+        root = tree.getroot()
+        
+        trans_units = []
+        for unit in root.findall(".//trans-unit"):
+            id = unit.get('id')
+            source = unit.find('source').text
+            target = unit.find('target').text
+            trans_units.append({'id': id, 'source': source, 'target': target})
+        
+        file_element = root.find('file')  
+        if file_element is not None:
+            target_language = file_element.get('target-language')
+        
+        return trans_units, target_language
+    except ET.ParseError as e:
+        settings.LOGGER.error(f"[{timespan}] Error parsing XLIFF file: {e}")
+        return 0, None
 
 @login_required
 def do_review_view(request, request_id):
@@ -266,46 +271,48 @@ def request_translation_view(request):
             literals_to_exclude_file = request.FILES.get('literal_ids_to_exclude_file')
             literalpatterns_to_exclude_file = request.FILES.get('literal_patterns_to_exclude_file')
 
+            trans_units, target_language = read_xliff_file(source_xliff_file)
 
-            trans_request = TranslationsRequests(
-                language = Languages.objects.get(id=language_id),
-                request_user = request.user,
-                source_xliff_file = source_xliff_file.name, 
-                target_xliff_file_name = source_xliff_file.name + '_translated.xlf',
-                literals_to_exclude_file = literals_to_exclude_file.name if literals_to_exclude_file else None,
-                literalpatterns_to_exclude_file = literalpatterns_to_exclude_file.name if literalpatterns_to_exclude_file else None,
-            )
-            trans_request.save()
+            if (trans_units > 0 and target_language is not None):
+                trans_request = TranslationsRequests(
+                    language = Languages.objects.get(id=language_id),
+                    request_user = request.user,
+                    source_xliff_file = source_xliff_file.name, 
+                    target_xliff_file_name = source_xliff_file.name + '_translated.xlf',
+                    literals_to_exclude_file = literals_to_exclude_file.name if literals_to_exclude_file else None,
+                    literalpatterns_to_exclude_file = literalpatterns_to_exclude_file.name if literalpatterns_to_exclude_file else None,
+                )
+                trans_request.save()
 
-            # Create a FileSystemStorage instance for the upload directory within MEDIA_ROOT
-            location = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(trans_request.id))
-            settings.LOGGER.debug(f"[{timespan}] Upload dir: {location}")
-            fs = FileSystemStorage(location=location, base_url=settings.MEDIA_URL + location + '/')
+                # Create a FileSystemStorage instance for the upload directory within MEDIA_ROOT
+                location = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(trans_request.id))
+                settings.LOGGER.debug(f"[{timespan}] Upload dir: {location}")
+                fs = FileSystemStorage(location=location, base_url=settings.MEDIA_URL + location + '/')
 
-            # Save the files to the upload directory
-            if source_xliff_file:
-                source_xliff_filename = fs.save(source_xliff_file.name, source_xliff_file)
-                trans_request.source_xliff_file = source_xliff_filename
+                # Save the files to the upload directory
+                if source_xliff_file:
+                    source_xliff_filename = fs.save(source_xliff_file.name, source_xliff_file)
+                    trans_request.source_xliff_file = source_xliff_filename
 
-            if literals_to_exclude_file:
-                exclude_filename = fs.save(literals_to_exclude_file.name, literals_to_exclude_file)
-                trans_request.literals_to_exclude_file = exclude_filename
+                if literals_to_exclude_file:
+                    exclude_filename = fs.save(literals_to_exclude_file.name, literals_to_exclude_file)
+                    trans_request.literals_to_exclude_file = exclude_filename
 
-            if literalpatterns_to_exclude_file:
-                exclude_patterns_filename = fs.save(literalpatterns_to_exclude_file.name, literalpatterns_to_exclude_file)
-                trans_request.literalpatterns_to_exclude_file = exclude_patterns_filename
+                if literalpatterns_to_exclude_file:
+                    exclude_patterns_filename = fs.save(literalpatterns_to_exclude_file.name, literalpatterns_to_exclude_file)
+                    trans_request.literalpatterns_to_exclude_file = exclude_patterns_filename
 
-            trans_request.save()
+                trans_request.save()
 
-            LogDiary.objects.create(
-                user = request.user, 
-                action = "Requested_Translation_to_AI",
-                translation_request_id = f"{trans_request.id}",
-            )
+                LogDiary.objects.create(user = request.user, action = "Requested_Translation_to_AI", translation_request_id = f"{trans_request.id}")
 
-            return render(request, 'xliff_manager/request_llm_confirmation.html', 
-                {'trans_request': trans_request})
+                return render(request, 'xliff_manager/request_llm_confirmation.html', 
+                    {'trans_request': trans_request})
            
+            else:
+                return render(request, 'xliff_manager/request_llm_translation_error.html')
+
+
     else:
         return render(request, 'xliff_manager/request_llm_translation.html', 
             {'selected_language': 0})
