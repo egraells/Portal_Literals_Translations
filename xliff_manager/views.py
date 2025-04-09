@@ -98,6 +98,7 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
     
     return HttpResponse("Invalid request", status=400)
 
+@login_required
 def download_file_confirmed(request):
     if request.method == 'POST':
         type = request.POST.get('type')
@@ -110,6 +111,16 @@ def download_file_confirmed(request):
                 with open(file_path, 'rb') as f:
                     response = HttpResponse(f.read(), content_type='application/force-download')
                     response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
+                    
+                    LogDiary.objects.create(
+                        user=request.user,
+                        action="Requester_Downloaded_Review",
+                        review_request_id = id if id is not None else '',
+                        additional_info=f"File downloaded: {file_to_download}",
+                    )
+
+                    ReviewRequests.objects.filter(id=id).update(status = 'Requester_Downloaded_Review')
+
                     return response
             else:
                 return HttpResponse("File not found", status=404)
