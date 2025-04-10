@@ -116,7 +116,7 @@
                             class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
                     </td>
                     <td style="font-size: smaller;">
-                        {% if request.status == 'Reviewed' %}
+                        {% if request.status == 'Reviewed' or request.status == 'Requester_Downloaded_Review' %}
                             <a href="{% url 'download_file' type='review_request_target_file' id=request.id file_to_download=request.target_xliff_file %}"
                             class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
                         {% else %}
