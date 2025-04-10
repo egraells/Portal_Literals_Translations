@@ -180,3 +180,9 @@ LOGGING = {
 
 #Logger parameters are defined at the end of this file
 LOGGER = logging.getLogger(__name__)
+
+# Seguretat
+# Example of conditional setting based on DEBUG
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True

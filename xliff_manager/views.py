@@ -105,13 +105,17 @@ def download_file_confirmed(request):
         file_to_download = request.POST.get('file_to_download')
 
         if type == 'translations_request_AItranslated_file_confirmed':
-            file_path = os.path.join('translations_requests', str(id), file_to_download)
+            file_path = os.path.join(settings.MEDIA_ROOT, 'translations_requests', str(id), file_to_download)
+
+            settings.LOGGER.debug(f"[{timespan}] File path to download: {file_path}")
+
             if os.path.exists(file_path):
                 with open(file_path, 'rb') as f:
                     response = HttpResponse(f.read(), content_type='application/force-download')
                     response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
                     return response
             else:
+                settings.LOGGER.error(f"[{timespan}] File not found: {file_path}")
                 return HttpResponse("File not found", status=404)
 
 def read_xliff_file(xliff_file):
@@ -131,6 +135,7 @@ def read_xliff_file(xliff_file):
             target_language = file_element.get('target-language')
         
         return trans_units, target_language
+    
     except ET.ParseError as e:
         settings.LOGGER.error(f"[{timespan}] Error parsing XLIFF file: {e}")
         return 0, None
@@ -197,12 +202,7 @@ def do_review_view(request, request_id):
                 date_declined = timezone.now(),
                 decline_justification = justification if justification is not None else '')
             
-            LogDiary.objects.create(
-                    user=request.user,
-                    action="Declined_Request",
-                    review_request_id = request_id,
-                    additional_info=justification,
-            )
+            LogDiary.objects.create(user=request.user, action="Declined_Request", review_request_id = request_id, additional_info=justification)
             
             request_declined = ReviewRequests.objects.get(id=request_id)
 
@@ -260,15 +260,13 @@ def request_translation_view(request):
         
         if action == 'translate_xliff':
             language_id = request.POST.get('language_selected')
-            
-            language_id = request.POST.get('language_selected')
             source_xliff_file = request.FILES['xliff_source_file']
             literals_to_exclude_file = request.FILES.get('literal_ids_to_exclude_file')
             literalpatterns_to_exclude_file = request.FILES.get('literal_patterns_to_exclude_file')
 
             trans_units, target_language = read_xliff_file(source_xliff_file)
 
-            if (trans_units > 0 and target_language is not None):
+            if (len(trans_units) > 0 and target_language is not None):
                 trans_request = TranslationsRequests(
                     language = Languages.objects.get(id=language_id),
                     request_user = request.user,
@@ -280,14 +278,28 @@ def request_translation_view(request):
                 trans_request.save()
 
                 # Create a FileSystemStorage instance for the upload directory within MEDIA_ROOT
+
                 location = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(trans_request.id))
-                settings.LOGGER.debug(f"[{timespan}] Upload dir: {location}")
-                fs = FileSystemStorage(location=location, base_url=settings.MEDIA_URL + location + '/')
+                settings.LOGGER.debug(f"[{timespan}] This folder will be used to upload the files: {location}")
+
+                # Create the directory if it doesn't exist
+                if not os.path.exists(location):
+                    os.makedirs(location, exist_ok=True)
+                    os.chmod(location, 0o777)  # 777 means read/write/exec for everyone (for folders)
+
+                # Create the FileSystemStorage
+                fs = FileSystemStorage(location=location, base_url=settings.MEDIA_URL + settings.TRANS_REQUESTS_FOLDER + f'/{trans_request.id}/')
 
                 # Save the files to the upload directory
                 if source_xliff_file:
                     source_xliff_filename = fs.save(source_xliff_file.name, source_xliff_file)
                     trans_request.source_xliff_file = source_xliff_filename
+                
+                    # Create a folder called "partial_files" inside the location folder
+                    partials_folder = os.path.join(location, "partial_files")
+                    os.makedirs(partials_folder, exist_ok=True)
+                    permissions = 0o777  # 777 means read/write/exec for everyone (for folders)
+                    os.chmod(partials_folder, permissions)
 
                 if literals_to_exclude_file:
                     exclude_filename = fs.save(literals_to_exclude_file.name, literals_to_exclude_file)
@@ -325,11 +337,7 @@ def choose_review_view(request):
         if action == 'review_selected':
             request_selected_id = request.POST.get('request_selected_id')
         
-            LogDiary.objects.create(
-                user=request.user,
-                action="Visualizes_Request",
-                review_request_id=request_selected_id,
-            )
+            LogDiary.objects.create(user=request.user, action="Visualizes_Request", review_request_id=request_selected_id)
             
             return redirect('do_request_review', request_id=request_selected_id)
 
@@ -407,11 +415,8 @@ def request_review_view(request):
                     )
 
                 # Log the action in the LogDiary
-                LogDiary.objects.create(
-                    user=request.user,
-                    user_requested=User.objects.get(id=business_reviewer),
-                    action="Requested_Business_Review",
-                    review_request_id=f"{review_request.id}",
+                LogDiary.objects.create(user=request.user, user_requested=User.objects.get(id=business_reviewer),
+                    action="Requested_Business_Review", review_request_id=f"{review_request.id}",
                 )
 
                 # return HttpResponse(f"File uploaded successfully: {uploaded_xliff_file}, Release: {new_release}")
@@ -482,9 +487,7 @@ def custom_instructions_view(request):
         custom_instruction.save()
 
         # Log the action in the LogDiary
-        LogDiary.objects.create(
-            user = request.user,
-            action = "Saved_Custom_Instructions",
+        LogDiary.objects.create(user = request.user, action = "Saved_Custom_Instructions",
         )
         
         return render(request, 'xliff_manager/custom_instructions_confirmation.html', {'num_records': len(custom_instructions)})

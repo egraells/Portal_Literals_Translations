@@ -41,19 +41,21 @@
                             <td><span class="badge rounded-pill text-bg-danger">{{request.status}}</span></td> 
                          {%elif request.status == "Reviewed" %}
                              <td><span class="badge rounded-pill text-bg-success">{{request.status}}</span></td> 
+                            {%elif request.status == "Error_from_AI" %}
+                             <td><span class="badge rounded-pill text-bg-danger">{{request.status}}</span></td> 
                          {% else %}
                              <td><span class="badge rounded-pill text-bg-primary">{{request.status}}</span></td> 
                          {% endif %}
-                        <td>{{ request.date_created|date:"Y/m/d" }}</td>
-                        <td>{{ request.date_received_from_llm|date:"Y/m/d" }}</td>
+                        <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
+                        <td>{{ request.date_received_from_llm|date:"Y/m/d H:i" }}</td>
                         <td><a href="{% url 'download_file' type='translations_request_original_file' id=request.id file_to_download=request.source_xliff_file.name %}" 
                             class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i>Download</a></td>
                         <td>
-                            {% if request.date_received_from_llm is not None %}
+                            {% if request.date_received_from_llm is not None and request.status != 'Error_from_AI' %}
                                 <a href="{% url 'download_file' type='translations_request_AItranslated_file' id=request.id file_to_download=request.target_xliff_file_name %}" 
                                 class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i>Download</a>
                                 {% else %}
-                                Not yet Available
+                                Not Available
                             {% endif %}
                         </td>
                     </tr>
