@@ -6,17 +6,18 @@
 
         <h1 class="mb-4"><i class="bi bi-journal-text"></i>Requests status</h1>
         <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
-
         <div style="margin-top: 15px; margin-bottom: 15px">
             <ul>
-                <li>All dates are shown in GMT and with YYYY/MM/DD format
-                <li>Requests are shown from newer to older
+                <li>All requests are shown from newer to older <i class="bi bi-arrow-down-circle"></i>
             </ul>
         </div>
 
-        <h2  style="margin-top: 30px">AI translations Requests</h5>
-            <p class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"></i> Created</p> meaning is pending the AI engine. <br>
-            <p class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"></i> AI translation ready</p> meaning the translation by the AI engine is ready and file is ready to be downloaded and reviewed.
+        
+        <h2  style="margin-top: 30px">
+            <i class="bi bi-person-fill"></i>
+            <i class="bi bi-arrow-right"></i>
+            <i class="bi bi-robot"></i>
+            Translations requested to AI</h5>
             <table class="table mt-3 table-sm" >
                 <thead>
                     <tr class="text-center">
@@ -24,7 +25,7 @@
                         <th scope="col">Target Language</th>
                         <th scope="col">Requester</th>
                         <th scope="col">Status</th>
-                        <th scope="col">Date Created</th>
+                        <th scope="col">Date Created <i class="bi bi-arrow-down-circle"></i></th>
                         <th scope="col">Received from AI</th>  
                         <th scope="col">Original file</th>
                         <th scope="col">Translated file</th>
@@ -63,19 +64,21 @@
                 </tbody>
             </table>
 
-        <h2 style="margin-top: 50px"> Reviews requested to Business experts</h5>
-        <p class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"></i> Created</p> meaning is pending the Reviewer. <br>
-        <p class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"></i> Reviewed</p> meaning the Reviewer already reviewed the translations and the file is ready to be downloaded and uploaded to Salesforce.
+        <h2 style="margin-top: 50px"> 
+            <i class="bi bi-person-fill"></i>
+            <i class="bi bi-arrow-right"></i>
+            <i class="bi bi-person-check-fill"></i>
+            Reviews requested to Business experts</h5>
             
         <table class="table mt-3 table-sm" >
             <thead>
                 <tr class="text-center">
-                    <th scope="col" style="width:1%">Request Id</th>
+                    <th scope="col" style="width:1%">Id</th>
                     <th scope="col">Requester & Reviewer</th>
                     <th scope="col">Language</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Requested Date</th>
-                    <th scope="col"><i class="bi bi-tag"></i>Tag</th>
+                    <th scope="col">Req. Date <i class="bi bi-arrow-down-circle"></i></th>
+                    <th scope="col">Tag</th>
                     <th scope="col">Date Reviewed</th>
                     <th scope="col"></i>Requester file</th>
                     <th scope="col"></i>Business Reviewed file</th>
