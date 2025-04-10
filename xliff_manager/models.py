@@ -76,7 +76,7 @@ class ReviewRequests(models.Model):
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
     technical_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='technical_requester', null=False, blank=False) 
     business_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='business_receiver', null=False, blank=False) 
-    target_xliff_file = models.FileField(upload_to='review_requests', blank=False)
+    target_xliff_file = models.FileField(blank=True)
     info_tag = models.TextField(null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_reviewed_by_business = models.DateTimeField(null=True, blank=True)

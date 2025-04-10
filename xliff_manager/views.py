@@ -11,6 +11,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.db.models import F
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import render, redirect
 
@@ -64,34 +65,75 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
             'type': type,
         })
     
-    if request.method == 'GET' and (type in ["review_request_source_file", "review_request_target_file", 
+    if request.method == 'GET' and (type in ["review_request_source_file", 
                                              "translations_request_original_file", "translations_request_AItranslated_file_confirmed"]):
         
         # Build the right path
-        if type == 'review_request_source_file' or type == 'review_request_target_file':
+        if type == 'review_request_source_file':
             # TODO: cal externalitzar review_requests com a path igual com fem amb TRANSLATIONS_REQUESTS_FOLDER
             file_path = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(id), file_to_download)
-        else:
+        elif type in ['translations_request_AItranslated_file_confirmed', 'translations_request_original_file']:
             file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
-        
+
         settings.LOGGER.debug(f"[{timespan}] File path to download: {file_path}")
         if os.path.exists(file_path):
             with open(file_path, 'rb') as f:
                 response = HttpResponse(f.read(), content_type='application/force-download')
                 response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
-                settings.LOGGER.debug(f"[{timespan}] File downloaded: {file_to_download}")
-                if type == 'review_request_target_file':
-                    # Log the action in the LogDiary
-                    LogDiary.objects.create(
-                            user=request.user, action="Requester_Downloaded_Review", 
-                            review_request_id = id if id is not None else '',
-                            additional_info=f"File downloaded: {file_to_download}",
-                        )
+                LogDiary.objects.create(
+                    user=request.user, 
+                    action = type, 
+                    review_request_id = id if id is not None else '', additional_info=f"File downloaded: {file_to_download}",
+                )
                     # Update the status of the review request   
+
+                # Only a change status is made when the requester downloads the file reviewed, as
+                # the reviewer will not be able to change the translations anymore
+                if type == 'Requester_Downloaded_Review':
                     ReviewRequests.objects.filter(id=id).update(status = 'Requester_Downloaded_Review')
+
                 return response
-        else:
-            return HttpResponse("File not found", status=404)
+        
+    elif type == 'review_request_target_file':
+            # Cal construir el fitxer amb les modificacions del usuari
+
+            # From the review_request model obtains the target_xliff_file
+            review_request = ReviewRequests.objects.get(id=id)
+            xliff_file_path_url = review_request.target_xliff_file.url #/media/filename.xliff
+            xliff_file_name = xliff_file_path_url.replace('/media/', '', 1)
+            xliff_file_path = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(id), xliff_file_name)
+
+            # Fetch all translation units where ai_translation and reviewer_translation differ
+            translation_units = Translations_Units.objects.filter(
+                request_id=id
+            ).exclude(reviewer_translation__exact='')
+            user_modified_trans_unit_ids = translation_units.values_list('salesforce_id', flat=True)
+
+            if os.path.exists(xliff_file_path):
+                with open(xliff_file_path, 'rb') as f:
+                    tree = ET.parse(f)
+                    root = tree.getroot()
+                    
+                    trans_units = []
+                    for unit in root.findall(".//trans-unit"):
+                        trans_unit_id = unit.get('id')
+                        if trans_unit_id in user_modified_trans_unit_ids:
+                            target_node = unit.find('target')
+                            reviewer_translation = translation_units.get(salesforce_id=trans_unit_id).reviewer_translation
+                            target_node.text = reviewer_translation
+
+                    # Generate the reviewed file    
+                    # Write the modified tree to a new XML file
+                    reviewed_file_path = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(id), f"user_reviewed_{xliff_file_name}")
+                    tree.write(reviewed_file_path, encoding='utf-8', xml_declaration=True)
+
+                    # Return the reviewed file as a downloadable response
+                    with open(reviewed_file_path, 'rb') as reviewed_file:
+                        response = HttpResponse(reviewed_file.read(), content_type='application/force-download')
+                        response['Content-Disposition'] = f'attachment; filename="reviewed_{xliff_file_name}"'
+                        return response
+    else:    
+        return HttpResponse("File not found", status=404)
            
     return HttpResponse("Invalid request", status=400)
 
@@ -271,8 +313,6 @@ def request_translation_view(request):
                 )
                 trans_request.save()
 
-                # Create a FileSystemStorage instance for the upload directory within MEDIA_ROOT
-
                 location = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(trans_request.id))
                 settings.LOGGER.debug(f"[{timespan}] This folder will be used to upload the files: {location}")
 
@@ -312,7 +352,6 @@ def request_translation_view(request):
            
             else:
                 return render(request, 'xliff_manager/request_llm_translation_error.html')
-
 
     else:
         return render(request, 'xliff_manager/request_llm_translation.html', 
@@ -373,22 +412,31 @@ def request_review_view(request):
                     language_id = language_id,
                     technical_user = request.user,
                     business_user = reviewer,
-                    target_xliff_file = uploaded_xliff_file,
+                    #target_xliff_file = uploaded_xliff_file,
                     requester_comment = requester_comment,
                     info_tag = tag
                 )
                 review_request.save()
 
                 # Create a FileSystemStorage instance for the upload directory within MEDIA_ROOT
-                upload_dir = os.path.join('review_requests', str(review_request.id))
-                fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, upload_dir), base_url=settings.MEDIA_URL + upload_dir + '/')
+
+                location = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(review_request.id))
+                settings.LOGGER.debug(f"[{timespan}] This folder will be used to upload the review file: {location}")
+
+                # Create the directory if it doesn't exist
+                if not os.path.exists(location):
+                    os.makedirs(location, exist_ok=True)
+                    os.chmod(location, 0o777)  # 777 means read/write/exec for everyone (for folders)
+
+                # Create the FileSystemStorage
+                fs = FileSystemStorage(location=location, base_url=settings.MEDIA_URL + 'review_requests' + f'/{review_request.id}/')
 
                 # Save the uploaded file
                 target_xliff_filename = fs.save(uploaded_xliff_file.name, uploaded_xliff_file)
                 review_request.target_xliff_file = target_xliff_filename
                 review_request.save()
 
-                dest_name = os.path.join(settings.MEDIA_ROOT, upload_dir, target_xliff_filename)
+                dest_name = os.path.join(location, target_xliff_filename)
 
                 trans_units, language_xliff_file = read_xliff_file(dest_name)
 
