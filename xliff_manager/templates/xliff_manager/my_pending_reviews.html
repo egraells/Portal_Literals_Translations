@@ -49,7 +49,7 @@
             
             <tr class="text-center">
                 <td scope="row">
-                    {% if request.status == 'Requested'  %}
+                    {% if request.status == 'Requested' or request.status == 'Saved_Custom_Translations'  %}
                     <div class="btn-group btn-group-sm" role="group" aria-label="Default button group">
                         <button type="submit" name="action" value = "review_selected" class="btn btn-outline-primary">
                             <i class="bi bi-eye"></i> Review this Request

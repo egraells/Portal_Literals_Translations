@@ -64,39 +64,35 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
             'type': type,
         })
     
-    if request.method == 'GET' and (type in ["review_request_source_file", "review_request_target_file"]):
-        file_path = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(id), file_to_download)
-        # TODO: cal externalitzar review_requests com a path igual com fem amb TRANSLATIONS_REQUESTS_FOLDER
+    if request.method == 'GET' and (type in ["review_request_source_file", "review_request_target_file", 
+                                             "translations_request_original_file", "translations_request_AItranslated_file_confirmed"]):
+        
+        # Build the right path
+        if type == 'review_request_source_file' or type == 'review_request_target_file':
+            # TODO: cal externalitzar review_requests com a path igual com fem amb TRANSLATIONS_REQUESTS_FOLDER
+            file_path = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(id), file_to_download)
+        else:
+            file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
+        
         settings.LOGGER.debug(f"[{timespan}] File path to download: {file_path}")
         if os.path.exists(file_path):
             with open(file_path, 'rb') as f:
                 response = HttpResponse(f.read(), content_type='application/force-download')
                 response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
+                settings.LOGGER.debug(f"[{timespan}] File downloaded: {file_to_download}")
+                if type == 'review_request_target_file':
+                    # Log the action in the LogDiary
+                    LogDiary.objects.create(
+                            user=request.user, action="Requester_Downloaded_Review", 
+                            review_request_id = id if id is not None else '',
+                            additional_info=f"File downloaded: {file_to_download}",
+                        )
+                    # Update the status of the review request   
+                    ReviewRequests.objects.filter(id=id).update(status = 'Requester_Downloaded_Review')
                 return response
         else:
             return HttpResponse("File not found", status=404)
-    
-    if request.method == 'GET' and type == 'translations_request_original_file':
-        file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
-        settings.LOGGER.debug(f"[{timespan}] Translation Original File path to download: {file_path}")
-        if os.path.exists(file_path):
-            with open(file_path, 'rb') as f:
-                response = HttpResponse(f.read(), content_type='application/force-download')
-                response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
-                return response
-        else:
-            return HttpResponse("File not found", status=404)
-    
-    if request.method == 'GET' and type == 'translations_request_AItranslated_file_confirmed':
-        file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
-        if os.path.exists(file_path):
-            with open(file_path, 'rb') as f:
-                response = HttpResponse(f.read(), content_type='application/force-download')
-                response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
-                return response
-        else:
-            return HttpResponse("File not found", status=404)
-    
+           
     return HttpResponse("Invalid request", status=400)
 
 @login_required
@@ -107,19 +103,11 @@ def download_file_confirmed(request):
         file_to_download = request.POST.get('file_to_download')
 
         if type == 'translations_request_AItranslated_file_confirmed':
-            file_path = os.path.join('translations_requests', str(id), file_to_download)
+            file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
             if os.path.exists(file_path):
                 with open(file_path, 'rb') as f:
                     response = HttpResponse(f.read(), content_type='application/force-download')
                     response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
-                    
-                    LogDiary.objects.create(
-                        user=request.user, action="Requester_Downloaded_Review", 
-                        review_request_id = id if id is not None else '',
-                        additional_info=f"File downloaded: {file_to_download}",
-                    )
-                    # Update the status of the review request   
-                    ReviewRequests.objects.filter(id=id).update(status = 'Requester_Downloaded_Review')
                     return response
             else:
                 return HttpResponse("File not found", status=404)
