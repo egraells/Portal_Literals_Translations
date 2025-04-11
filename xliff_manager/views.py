@@ -29,7 +29,7 @@ if settings.SEND_EMAILS:
     send_mail('Test', 'This is a test', 'esteve.graells@proton.me',['esteve.graells@gmail.com'],fail_silently=False)
 
 timespan = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-settings.LOGGER.debug(f"[{timespan}] From settings.py TRANS_REQUESTS_FOLDER: {settings.TRANS_REQUESTS_FOLDER}, settings.SEND_EMAILS: {settings.SEND_EMAILS}")
+settings.LOGGER.debug(f"From settings.py TRANS_REQUESTS_FOLDER: {settings.TRANS_REQUESTS_FOLDER}, settings.SEND_EMAILS: {settings.SEND_EMAILS}")
 
 def userpage(request):
     return render(request, 'xliff_manager/userpage.html')
@@ -79,7 +79,7 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
         elif type in ['translations_request_AItranslated_file_confirmed', 'translations_request_original_file']:
             file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
 
-        settings.LOGGER.debug(f"[{timespan}] File path to download: {file_path}")
+        settings.LOGGER.debug(f"File path to download: {file_path}")
         if os.path.exists(file_path):
             with open(file_path, 'rb') as f:
                 response = HttpResponse(f.read(), content_type='application/force-download')
@@ -320,7 +320,7 @@ def request_translation_view(request):
                 trans_request.save()
 
                 location = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(trans_request.id))
-                settings.LOGGER.debug(f"[{timespan}] This folder will be used to upload the files: {location}")
+                settings.LOGGER.debug(f"This folder will be used to upload the files: {location}")
 
                 # Create the directory if it doesn't exist
                 if not os.path.exists(location):
@@ -427,7 +427,7 @@ def request_review_view(request):
                 # Create a FileSystemStorage instance for the upload directory within MEDIA_ROOT
 
                 location = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(review_request.id))
-                settings.LOGGER.debug(f"[{timespan}] This folder will be used to upload the review file: {location}")
+                settings.LOGGER.debug(f"This folder will be used to upload the review file: {location}")
 
                 # Create the directory if it doesn't exist
                 if not os.path.exists(location):
