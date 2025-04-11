@@ -3,11 +3,9 @@
 {% load static %}
 
 {% block body %}
-    <div class="container-fluid bg-light" style="min-height: 50vh; display: flex; justify-content: center; align-items: center;">
         <div class="row">
-            <div class="col-md-6 d-none d-md-block bg-primary text-white p-5 rounded-start"
-                 style="background-image: url('{% static 'images/login-bg.jpg' %}'); background-size: cover; background-position: center;">
-                <div class="d-flex flex-column justify-content-center align-items-center h-100">
+            <div class="col-md-6 d-none d-md-block bg-primary text-white p-5 rounded-start shadow">
+                <div class="d-flex flex-column justify-content-center align-items-center h-100 ">
                     <h1 class="mb-4">Salesforce AI Translations for Novartis</h1>
                     <p class="lead text-center">This site allows to test the Salesforce AI Translator built by the CEP Team in DDIT.</p>
                     <hr class="my-4">
@@ -46,5 +44,4 @@
               
             </div>
         </div>
-    </div>
 {% endblock %}

@@ -25,16 +25,10 @@
         {% endblock %}
 </head>
 <body class="container mt-5">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light" style="margin-bottom: 20px">
-        <div class="container-fluid">
-            {% if request.resolver_match.url_name != 'login' %}
-                <i class="bi bi-globe2" style="font-size: 2rem; color: cornflowerblue;margin-right: 5px"></i>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            {% endif %}
-
-            {% if request.resolver_match.url_name != 'login' %}
+    
+    
+    {% if request.resolver_match.url_name != 'login' %}
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" style="margin-bottom: 20px"> 
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                     </ul>
@@ -62,9 +56,9 @@
                     {% endif %}
                     </ul>
                 </div>
-            {% endif %}
-        </div>
-    </nav>
+            </div>
+        </nav>
+    {% endif %}
 
     <div class="card">
         <div class="card-body">

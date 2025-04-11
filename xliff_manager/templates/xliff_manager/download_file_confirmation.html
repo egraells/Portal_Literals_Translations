@@ -2,15 +2,20 @@
 
 {% block body %}
 
-<h1 class="mb-4">Downloading an AI Translated file : 
+<h1 class="mb-4">
+    {% load static %}
+    <img src="{% static 'images/sop.png' %}" style="width:50px" class="card-img-top">
+    Downloading an AI Translated file 
 </h1>
 <p class="mb-0"><a href="{% url 'home' %}" class="btn btn-outline-primary" style="margin-bottom: 20px">Back to Home</a></p>
 
     <div class="card">
+        
         <div class="card-body">
             <div class="card-header">Confirmation Required</div>
         </div>
         <div class="card-body">
+            
             <div class="alert alert-warning" role="alert">
                 The current Novartis SOPs for AI translations requires that a 
                 Business Review is done before uploading the file to a user facing system (Production Instance). <br>
