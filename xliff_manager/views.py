@@ -2,6 +2,8 @@ import os
 import shutil
 from datetime import datetime
 import xml.etree.ElementTree as ET
+from urllib.parse import unquote
+
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -103,7 +105,7 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
             # From the review_request model obtains the target_xliff_file
             review_request = ReviewRequests.objects.get(id=id)
             xliff_file_path_url = review_request.target_xliff_file.url #/media/filename.xliff
-            xliff_file_name = xliff_file_path_url.replace('/media/', '', 1)
+            xliff_file_name = unquote(xliff_file_path_url.replace('/media/', '', 1))
             xliff_file_path = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(id), xliff_file_name)
 
             # Fetch all translation units where ai_translation and reviewer_translation differ
