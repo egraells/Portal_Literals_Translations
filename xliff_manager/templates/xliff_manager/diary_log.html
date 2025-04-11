@@ -9,40 +9,21 @@
 <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
 
 <div style="margin-top: 15px; margin-bottom: 15px">
-    <h3>Legend and expected sequence of events</h3>
-    The infomation provided in this Log is as follows:
+    The infomation provided follows this structure:
     <p>
-    <span class="badge text-bg-warning rounded-pill"><i class="bi bi-calendar-date"></i> Date & Time   </span>
-        Time when the event happened: all dates are shown in GMT format 
-    <p>
+        <span class="badge text-bg-warning rounded-pill"><i class="bi bi-calendar-date"></i> Date & Time   </span>
         <span class="badge text-bg-success rounded-pill">
-            <i class="bi bi-person"></i> User firstname
-        </span>
-        The user that genereated the event 
-    </p>
-    <p>
-        An event title:
-            <span class="badge rounded-pill text-bg-primary"><i class="bi bi-1-circle"></i> A Developer requests for a AI Translation</span>
-            <span class="badge rounded-pill text-bg-primary"><i class="bi bi-2-circle"></i> The AI generated the translations</span>
-        regarding <b>requests for AI translations</b>, and 
-            <span class="badge text-bg-primary rounded-pill"><i class="bi bi-1-circle"></i> A Developer requests for a Business Review</span>
-            <span class="badge text-bg-primary rounded-pill"><i class="bi bi-2-circle"></i> A Business Reviewer visualizes a Request</span>
-            <span class="badge text-bg-primary rounded-pill"><i class="bi bi-3-circle"></i> A Business Reviewer tailors literals</span>
-            <span class="badge text-bg-primary rounded-pill"><i class="bi bi-4-circle"></i> A Business Reviewer mark as Reviewed</span>
-            <span class="badge text-bg-primary rounded-pill"><i class="bi bi-5-circle"></i> A developer downloads the Reviewed file</span>
-        regarding requests for <b>Business reviews</b>.
-    <p>
-        <span class="badge text-bg-info rounded-pill">Id</span> of the request, allowing to follow a request through the log.
-    <p>
-        <span class="badge text-bg-secondary rounded-pill">Details</span> of the request, to provide more context to the event.
-    </p>
+        <i class="bi bi-person"></i> User first Name</span>
+        <span class="badge rounded-pill text-bg-primary"><i class="bi bi-1-circle"></i> Event name</span>
+        <span class="badge text-bg-info rounded-pill">Request Id (translation or review)</span> and 
+        <span class="badge text-bg-secondary rounded-pill">Details</span>.
 </div>
 
 <h2 style="margin-top: 50px">Diary Log (newer to older)</h5>
     {% for activity in activity_list%}
     <ul class="list-group list-group-flush">
         <li class="list-group-item" style="padding-top:2px; padding-bottom:2px; ">
-            {% if activity.action == 'Requested_Translation_to_AI' or activity.action == 'Translation_Received_from_AI' or activity.action == 'Requested_Business_Review' or activity.action == 'Visualizes_Request' or activity.action == 'Review_Marked_as_Reviewed' or activity.action == 'Reviewer_Saves_Custom_Translations' or activity.action == 'Requester_Downloaded_Review' or activity.action == 'Saved_Custom_Translations' or activity.action == 'Saved_Custom_Instructions' or activity.action == 'Declined_Request' %}
+            {% if activity.action == 'Requested_Translation_to_AI' or activity.action == 'Translation_Received_from_AI' or activity.action == 'Requested_Business_Review' or activity.action == 'Visualizes_Request' or activity.action == 'Review_Marked_as_Reviewed' or activity.action == 'Reviewer_Saves_Custom_Translations' or activity.action == 'Requester_Downloaded_Review' or activity.action == 'Saved_Custom_Translations' or activity.action == 'Saved_Custom_Instructions' or activity.action == 'Declined_Request' or activity.action == 'Downloaded_AI_Translations'%}
                 <span class="badge text-bg-warning rounded-pill">
                     <i class="bi bi-calendar-date"></i>
                     {{ activity.date|date:"Y/m/d H:i" }} 

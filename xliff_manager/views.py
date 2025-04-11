@@ -37,7 +37,10 @@ def home(request):
         return redirect('login')
     else:
         current_user = request.user
-        pending_requests_count = ReviewRequests.objects.filter(business_user=current_user, status='Requested').count()
+        pending_requests_count = ReviewRequests.objects.filter(
+            business_user=current_user, 
+            status__in=['Requested', 'Saved_Custom_Translations']
+        ).count()
         context = {
             'pending_requests_count': pending_requests_count,
         }
@@ -150,6 +153,7 @@ def download_file_confirmed(request):
                 with open(file_path, 'rb') as f:
                     response = HttpResponse(f.read(), content_type='application/force-download')
                     response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
+                    LogDiary.objects.create(user=request.user, action="Downloaded_AI_Translations", translation_request_id = id)
                     return response
             else:
                 settings.LOGGER.error(f"[{timespan}] File not found: {file_path}")
