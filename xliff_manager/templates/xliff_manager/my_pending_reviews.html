@@ -82,7 +82,7 @@
                         title="{{ request.reviewer_comment|default:"None" }}"><i class="bi bi-chat-dots"></i> {{ request.business_user.first_name }} Comments</button>
                 </td>
                 <td style="font-size: smaller;">
-                    <span class="fi fi-{{ request.language.iso_value}}"></span> {{ request.language.name }}
+                    <span class="fi fi-{{ request.language.lang_iso_value}}"></span> {{ request.language.name }}
                 </td>
                 {% if request.status == "Declined" %}
                    <td><span class="badge rounded-pill text-bg-danger">{{request.status}}</span></td> 

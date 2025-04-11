@@ -37,6 +37,7 @@ with open(CONFIG_FILE) as config_file:
     config = json.load(config_file)
     
 TRANS_REQUESTS_FOLDER = config['TRANS_REQUESTS_FOLDER']
+REV_REQUESTS_FOLDER = config['REV_REQUESTS_FOLDER']
 SECRET_KEY = config['SECRET_KEY']
 # For sending 
 SEND_EMAILS = config['SEND_EMAILS']

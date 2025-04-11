@@ -75,8 +75,7 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
         
         # Build the right path
         if type == 'review_request_source_file':
-            # TODO: cal externalitzar review_requests com a path igual com fem amb TRANSLATIONS_REQUESTS_FOLDER
-            file_path = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(id), file_to_download)
+            file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), file_to_download)
         elif type in ['translations_request_AItranslated_file_confirmed', 'translations_request_original_file']:
             file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
 
@@ -106,7 +105,7 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
             review_request = ReviewRequests.objects.get(id=id)
             xliff_file_path_url = review_request.target_xliff_file.url #/media/filename.xliff
             xliff_file_name = unquote(xliff_file_path_url.replace('/media/', '', 1))
-            xliff_file_path = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(id), xliff_file_name)
+            xliff_file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), xliff_file_name)
 
             # Fetch all translation units where ai_translation and reviewer_translation differ
             translation_units = Translations_Units.objects.filter(
@@ -129,7 +128,7 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
 
                     # Generate the reviewed file    
                     # Write the modified tree to a new XML file
-                    reviewed_file_path = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(id), f"user_reviewed_{xliff_file_name}")
+                    reviewed_file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), f"user_reviewed_{xliff_file_name}")
                     tree.write(reviewed_file_path, encoding='utf-8', xml_declaration=True)
 
                     # Return the reviewed file as a downloadable response
@@ -293,8 +292,9 @@ def do_review_view(request, request_id):
 def request_translation_view(request):
 
     if request.method == 'GET':
+        languages = Languages.objects.all().order_by('name')
         return render(request, 'xliff_manager/request_llm_translation.html', 
-            {'languages': Languages.objects.all(),}
+            {'languages': languages,}
         )
     
     if request.method == 'POST' :
@@ -426,7 +426,7 @@ def request_review_view(request):
 
                 # Create a FileSystemStorage instance for the upload directory within MEDIA_ROOT
 
-                location = os.path.join(settings.MEDIA_ROOT, 'review_requests', str(review_request.id))
+                location = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(review_request.id))
                 settings.LOGGER.debug(f"[{timespan}] This folder will be used to upload the review file: {location}")
 
                 # Create the directory if it doesn't exist
@@ -435,7 +435,7 @@ def request_review_view(request):
                     os.chmod(location, 0o777)  # 777 means read/write/exec for everyone (for folders)
 
                 # Create the FileSystemStorage
-                fs = FileSystemStorage(location=location, base_url=settings.MEDIA_URL + 'review_requests' + f'/{review_request.id}/')
+                fs = FileSystemStorage(location=location, base_url=settings.MEDIA_URL + settings.REV_REQUESTS_FOLDER + f'/{review_request.id}/')
 
                 # Save the uploaded file
                 target_xliff_filename = fs.save(uploaded_xliff_file.name, uploaded_xliff_file)

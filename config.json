@@ -1,6 +1,7 @@
 {
 	"SECRET_KEY": "django-insecure-mhgt#4+)!(ck=)!2adbapjq-ny@da7m0_i#zy4l=h(ur*sq9q-",
 	"TRANS_REQUESTS_FOLDER": "translations_requests",
+	"REV_REQUESTS_FOLDER": "review_requests",
 	"SEND_EMAILS" : false,
 	"EMAIL_HOST" : "smtp.protonmail.com",
 	"EMAIL_HOST_USER" : "esteve.graells@proton.me",
