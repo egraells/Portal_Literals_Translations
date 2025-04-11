@@ -15,7 +15,7 @@
         
         <h2  style="margin-top: 30px">
             <i class="bi bi-person-fill"></i>
-            <i class="bi bi-arrow-right"></i>
+            <i class="bi bi-caret-right-fill"></i>
             <i class="bi bi-robot"></i>
             Translations requested to AI</h5>
             <table class="table mt-3 table-sm" >
@@ -38,9 +38,9 @@
                         <td><span class="fi fi-{{ request.language.iso_value}}"></span>
                             {{ request.language.name }}</td>
                         <td>{{ request.request_user.first_name }} {{ request.request_user.last_name }}</td>
-                        {% if request.status == "Declined" %}
+                        {% if request.status == "Created" %}
                             <td><span class="badge rounded-pill text-bg-danger">{{request.status}}</span></td> 
-                         {%elif request.status == "Reviewed" %}
+                         {%elif request.status == "Received_from_LLM" %}
                              <td><span class="badge rounded-pill text-bg-success">{{request.status}}</span></td> 
                             {%elif request.status == "Error_from_AI" %}
                              <td><span class="badge rounded-pill text-bg-danger">{{request.status}}</span></td> 
@@ -48,7 +48,16 @@
                              <td><span class="badge rounded-pill text-bg-primary">{{request.status}}</span></td> 
                          {% endif %}
                         <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
-                        <td>{{ request.date_received_from_llm|date:"Y/m/d H:i" }}</td>
+                        <td>
+                            {% if request.status == "Created" %}
+                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                Translating ...
+                            {% else %}
+                                {{ request.date_received_from_llm|date:"Y/m/d H:i" }}
+                            {% endif %}
+
+                        </td>
+                        
                         <td><a href="{% url 'download_file' type='translations_request_original_file' id=request.id file_to_download=request.source_xliff_file.name %}" 
                             class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i>Download</a></td>
                         <td>
@@ -66,7 +75,7 @@
 
         <h2 style="margin-top: 50px"> 
             <i class="bi bi-person-fill"></i>
-            <i class="bi bi-arrow-right"></i>
+            <i class="bi bi-caret-right-fill"></i>
             <i class="bi bi-person-check-fill"></i>
             Reviews requested to Business experts</h5>
             

@@ -28,9 +28,9 @@
             <div class="card-group" style="margin-bottom: 30px">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-filetype-xml"></i> Request an AI Translation</h5>
+                        <h5 class="card-title">Request an AI Translation</h5>
                         <p class="card-text">Submit an XLIFF file with Literals, extracted from Salesforce, for translation to the AI engine.</p>
-                        <a href="{% url 'request_translation' %}" class="btn btn-primary">Request an AI Translation</a>
+                        <a href="{% url 'request_translation' %}" class="btn btn-primary"><i class="bi bi-robot"></i> Request an AI Translation</a>
                     </div>
                     <div class="card-footer">
                         <small class="text-body-secondary">An XLIFF file is required.</small>
@@ -39,9 +39,9 @@
                 
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-filetype-xml"></i> Request a Business Review</h5>
+                        <h5 class="card-title"> Request a Business Review</h5>
                         <p class="card-text">Submit an AI-translated and previously reviewed by the team to business for review.</p>
-                        <a href="{% url 'request_review' %}" class="btn btn-primary">Request a Business Review</a>
+                        <a href="{% url 'request_review' %}" class="btn btn-primary"><i class="bi bi-person-check-fill"></i>  Request a Business Review</a>
                     </div>
                     <div class="card-footer">
                         <small class="text-body-secondary">An XLIFF file is required.</small>
@@ -52,9 +52,11 @@
             <div class="card-group" style="margin-bottom: 30px">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-list-check"></i> Check Request Status for AI and Business Review</h5>
-                        <p class="card-text">Monitor the status of AI and Business reviews and  and Download the resulted files.</p>
-                        <a href="{% url 'check_request_status' %}" class="btn btn-primary">Check AI & Business requests</a>
+                        <h5 class="card-title">Check the status for 
+                             Requests to the AI Engine for translations & for Business Reviews  </h5>
+                        <p class="card-text">Check the latest status for AI Translations requests and Business reviews and Download files.</p>
+                        <a href="{% url 'check_request_status' %}" class="btn btn-primary"> <i class="bi bi-journal-text"></i> 
+                             Check AI and Business Requests</a>
                     </div>
                     <div class="card-footer">
                         <small class="text-body-secondary">You can check both AI and Business review requests.</small>
@@ -68,9 +70,9 @@
             <div class="card-group" style="margin-bottom: 30px">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-person-lines-fill"></i> My Reviews (pending and done)</h5>
+                        <h5 class="card-title"> My Reviews (pending and done)</h5>
                         <p class="card-text">Check all your Review requests, regardless of the status.</p>
-                        <a href="{% url 'choose_review_view' %}" class="btn btn-primary">Check my Reviews</a>
+                        <a href="{% url 'choose_review_view' %}" class="btn btn-primary"><i class="bi bi-person-lines-fill"></i> Check my Reviews</a>
                     </div>
                     <div class="card-footer">
                         {% if pending_requests_count > 0 %}
@@ -89,9 +91,9 @@
             <div class="card-group" style="margin-bottom: 15px">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-pencil" user></i> Custom AI Translation Instructions</h5>
+                        <h5 class="card-title">Custom AI Translation Instructions</h5>
                         <p class="card-text">Provide specific instructions to guide the AI in translating texts according to your preferences and criteria.</p>
-                        <a href="{% url 'custom_instructions' %}" class="btn btn-primary">Custom Instructions</a>
+                        <a href="{% url 'custom_instructions' %}" class="btn btn-primary"><i class="bi bi-pencil" user></i>  Custom Instructions</a>
                     </div>
                     <div class="card-footer">
                         <small class="text-body-secondary">Instructions are managed by language, not per request or user.</small>
@@ -102,9 +104,9 @@
             <div class="card-group" style="margin-bottom: 15px">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-calendar-date" user></i> Activity Log </h5>
+                        <h5 class="card-title">Activity Log </h5>
                         <p class="card-text">Review the Full log of activity, for your requests to the AI engine and to reviewers and their answers.    </p>
-                        <a href="{% url 'diary_log' %}" class="btn btn-primary">See the Full log</a>
+                        <a href="{% url 'diary_log' %}" class="btn btn-primary"><i class="bi bi-calendar-date" user></i>  See the Full log</a>
                     </div>
                     <div class="card-footer">
                         <small class="text-body-secondary">See all the activities in the system.</small>
