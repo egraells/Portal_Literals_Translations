@@ -164,7 +164,7 @@ def read_xliff_file(xliff_file):
         for unit in root.findall(".//trans-unit"):
             id = unit.get('id')
             source = unit.find('source').text
-            target = unit.find('target').text
+            target = unit.find('target').text if unit.find('target') is not None else ''
             trans_units.append({'id': id, 'source': source, 'target': target})
         
         file_element = root.find('file')  
