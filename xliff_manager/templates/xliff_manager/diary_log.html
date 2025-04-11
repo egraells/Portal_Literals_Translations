@@ -15,7 +15,7 @@
         <span class="badge text-bg-success rounded-pill">
         <i class="bi bi-person"></i> User first Name</span>
         <span class="badge rounded-pill text-bg-primary"><i class="bi bi-1-circle"></i> Event name</span>
-        <span class="badge text-bg-info rounded-pill">Request Id (translation or review)</span> and 
+        <span class="badge text-bg-dark rounded-pill">Request Id (translation or review)</span> and 
         <span class="badge text-bg-secondary rounded-pill">Details</span>.
 </div>
 
@@ -35,27 +35,27 @@
                 <span class="badge text-bg-primary rounded-pill">{{ activity.action }}</span>
                 
                 {% if activity.user_requested is not None%}
-                    to
-                    <span class="badge text-bg-primary rounded-pill">
+                    <i class="bi bi-arrow-right-circle-fill "></i>
+                    <span class="badge text-bg-success rounded-pill">
                      <i class="bi bi-person"></i>{{ activity.user_requested.first_name }} {{ activity.user_requested.last_name }}
                 </span>
                 {%endif%}
                     
                 {% if activity.translation_request_id or activity.review_request_id %}
-                    <span class="badge text-bg-info rounded-pill">
+                    <span class="badge text-bg-dark rounded-pill">
                         Id: {{ activity.translation_request_id | default_if_none:'' }} {{ activity.review_request_id | default_if_none:'' }}
                     </span>
                 {% endif%}
                 
                 {% if activity.additional_info %}
-                    <i style="color:grey"> Details: {{ activity.additional_info|default_if_none:'None' }} </i>
+                <span class="badge text-bg-light rounded-pill">Details</span>{{ activity.additional_info|default_if_none:'None' }}
                 {% endif %}
             
             {% else %}
                 <span class="badge text-bg-danger rounded-pill">{{ activity.action }}?</span>
                 <span class="badge text-bg-info rounded-pill">({{ activity.translation_request_id }})</span>
                 <br>
-                <i class="bi bi-chat-square-text" style="color:red"> Details: </i>
+                <i class="bi bi-chat-square-text" style="color:red"></i>
                     {% if activity.additional_info %}
                         {{ activity.additional_info|default_if_none:'None' }} 
                     {% else %}
