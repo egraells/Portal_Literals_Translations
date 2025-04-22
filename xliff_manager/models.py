@@ -151,8 +151,12 @@ class LogDiary(models.Model):
                 self.description = f"{self.additional_info}"
             case "Saved_Custom_Instructions":
                 self.description = f"{self.additional_info}"   
+            case "translations_request_original_file":
+                self.description = f"{self.additional_info}"
+            case "translations_request_AItranslated_file_confirmed":
+                self.description = f"{self.additional_info}"
             case _:
-                self.description = f"Unknown action: {self.action} at {date_format}  - Additional Info: {self.additional_info}"
+                self.description = f"Action: {self.action} at {date_format}  - Additional Info: {self.additional_info}"
         
         super().save(*args, **kwargs)
 

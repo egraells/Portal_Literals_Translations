@@ -87,7 +87,8 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
                 LogDiary.objects.create(
                     user=request.user, 
                     action = type, 
-                    review_request_id = id if id is not None else '', additional_info=f"File downloaded: {file_to_download}",
+                    review_request_id = id if id is not None else '', 
+                    additional_info=f"File downloaded: {file_to_download}",
                 )
                     # Update the status of the review request   
 
@@ -131,6 +132,13 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
                     reviewed_file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), f"user_reviewed_{xliff_file_name}")
                     tree.write(reviewed_file_path, encoding='utf-8', xml_declaration=True)
 
+                    LogDiary.objects.create(
+                        user=request.user, 
+                        action = 'Downloaded_Reviewed_File', 
+                        review_request_id = id if id is not None else '', 
+                        additional_info=f"File downloaded: {file_to_download}",
+                    )
+
                     # Return the reviewed file as a downloadable response
                     with open(reviewed_file_path, 'rb') as reviewed_file:
                         response = HttpResponse(reviewed_file.read(), content_type='application/force-download')
@@ -154,7 +162,12 @@ def download_file_confirmed(request):
                 with open(file_path, 'rb') as f:
                     response = HttpResponse(f.read(), content_type='application/force-download')
                     response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
-                    LogDiary.objects.create(user=request.user, action="Downloaded_AI_Translations", translation_request_id = id)
+                    LogDiary.objects.create(
+                        user=request.user, 
+                        action="Downloaded_AI_Translations",
+                        additional_info=f"File downloaded: {file_to_download}", 
+                        translation_request_id = id,
+                        )
                     return response
             else:
                 settings.LOGGER.error(f"[{timespan}] File not found: {file_path}")
