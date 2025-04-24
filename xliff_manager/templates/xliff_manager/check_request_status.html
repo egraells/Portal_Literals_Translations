@@ -22,7 +22,7 @@
                 <thead>
                     <tr class="text-center">
                         <th scope="col">Request Id</th>
-                        <th scope="col">Target Language</th>
+                        <th scope="col">Language</th>
                         <th scope="col">Requester</th>
                         <th scope="col">Status</th>
                         <th scope="col">Date Created <i class="bi bi-arrow-down-circle"></i></th>
@@ -35,7 +35,7 @@
                     {% for request in translations_requests %}
                     <tr class="text-center"> 
                         <td scope="row">{{ request.id }}</td>
-                        <td><span class="fi fi-{{ request.language.flag_iso_value}}"></span>
+                        <td class="text-start"><span class="fi fi-{{ request.language.flag_iso_value}}"></span>
                             {{ request.language.name }}</td>
                         <td>{{ request.request_user.first_name }} {{ request.request_user.last_name }}</td>
                         <td>
@@ -50,7 +50,7 @@
                         <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
                         <td>
                             {% if request.status == "Created" %}
-                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                <img src="https://raw.githubusercontent.com/n3r4zzurr0/svg-spinners/abfa05c49acf005b8b1e0ef8eb25a67a7057eb20/svg-css/wind-toy.svg" alt="Loading..." width="20" height="20" style="margin-top: 5px; margin-bottom: 5px;">
                                 Translating ...
                             {% else %}
                                 {{ request.date_received_from_llm|date:"Y/m/d H:i" }}
@@ -104,11 +104,11 @@
                         <button type="button" class="btn btn-sm btn-light" 
                             data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
-                            title="{{ request.requester_comment|default:"None" }}"><i class="bi bi-chat-dots"></i> {{ request.technical_user.first_name }} Comments</button>
+                            title="{{ request.requester_comment|default:"None" }}"><i class="bi bi-chat-dots"></i> {{ request.technical_user.first_name }}</button>
                         <button type="button" class="btn btn-sm btn-light" 
                             data-bs-toggle="tooltip" data-bs-placement="top"
                             data-bs-custom-class="custom-tooltip"
-                            title="{{ request.reviewer_comment|default:"None" }}"><i class="bi bi-chat-dots"></i> {{ request.business_user.first_name }} Comments</button>
+                            title="{{ request.reviewer_comment|default:"None" }}"><i class="bi bi-chat-dots"></i> {{ request.business_user.first_name }}</button>
                     </td>
                     <td style="font-size: smaller;">
                         <span class="fi fi-{{ request.language.lang_iso_value}}"></span> {{ request.language.name }}
