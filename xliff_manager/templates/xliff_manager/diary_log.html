@@ -13,9 +13,10 @@
     <p>
         <span class="badge text-bg-warning rounded-pill"><i class="bi bi-calendar-date"></i> Date & Time   </span>
         <span class="badge text-bg-success rounded-pill">
-        <i class="bi bi-person"></i> User first Name</span>
+        <i class="bi bi-person"></i> User</span>
         <span class="badge rounded-pill text-bg-primary"><i class="bi bi-1-circle"></i> Event name</span>
-        <span class="badge text-bg-dark rounded-pill">Request Id (translation or review)</span> and 
+        <span class="badge text-bg-dark rounded-pill">Request Id (translation or review)</span> 
+        <span class="badge text-bg-light rounded-pill">Language involved</span>
         <span class="badge text-bg-secondary rounded-pill">Details</span>.
 </div>
 
@@ -33,12 +34,11 @@
                 </span>
                 
                 <span class="badge text-bg-primary rounded-pill">{{ activity.action }}</span>
-                
                 {% if activity.user_requested is not None%}
                     <i class="bi bi-arrow-right-circle-fill "></i>
                     <span class="badge text-bg-success rounded-pill">
-                     <i class="bi bi-person"></i>{{ activity.user_requested.first_name }} {{ activity.user_requested.last_name }}
-                </span>
+                        <i class="bi bi-person"></i>{{ activity.user_requested.first_name }} {{ activity.user_requested.last_name }}
+                    </span>
                 {%endif%}
                     
                 {% if activity.translation_request_id or activity.review_request_id %}
@@ -46,6 +46,20 @@
                         Id: {{ activity.translation_request_id | default_if_none:'' }} {{ activity.review_request_id | default_if_none:'' }}
                     </span>
                 {% endif%}
+
+                {% if activity.translation_request.language %}
+                <span class="badge text-bg-light rounded-pill">
+                        <span class="fi fi-{{ activity.translation_request.language.flag_iso_value}}"></span>
+                        {{ activity.translation_request.language.name }}</td>
+                    </span>
+                {% endif %}
+
+                {% if activity.review_request.language %}
+                <span class="badge text-bg-light rounded-pill">
+                        <span class="fi fi-{{ activity.review_request.language.flag_iso_value}}"></span>
+                        {{ activity.review_request.language.name }}</td>
+                    </span>
+                {% endif %}
                 
                 {% if activity.additional_info %}
                     <span class="badge text-bg-light rounded-pill">Details</span>{{ activity.additional_info|default_if_none:'None' }}
@@ -61,7 +75,6 @@
                     {% else %}
                         {{ activity.description|default_if_none:'None'}}
                     {% endif %}
-            
             {% endif %}
         </li>
     </ul>

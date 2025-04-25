@@ -56,9 +56,8 @@
                         </button>
                     </div>
                     {% elif request.status == 'Declined' %}
-                        <button type="button" class="btn btn-secondary btn-sm">
-                            <i class="bi bi-arrow-counterclockwise"></i>
-                            Back to Requested
+                        <button type="button" class="btn btn-danger btn-sm">
+                            Declined
                         </button>
                     {% elif request.status == 'Reviewed' %}
                     <div class="btn-group btn-group-sm" role="group" aria-label="Default button group">
@@ -75,11 +74,11 @@
                     <button type="button" class="btn btn-sm btn-light" 
                         data-bs-toggle="tooltip" data-bs-placement="top"
                         data-bs-custom-class="custom-tooltip"
-                        title="{{ request.requester_comment|default:"None" }}"><i class="bi bi-chat-dots"></i> {{ request.technical_user.first_name }} Comments</button>
+                        title="{{ request.requester_comment|default:"None" }}"><i class="bi bi-chat-dots"></i> {{ request.technical_user.first_name }}</button>
                     <button type="button" class="btn btn-sm btn-light" 
                         data-bs-toggle="tooltip" data-bs-placement="top"
                         data-bs-custom-class="custom-tooltip"
-                        title="{{ request.reviewer_comment|default:"None" }}"><i class="bi bi-chat-dots"></i> {{ request.business_user.first_name }} Comments</button>
+                        title="{{ request.reviewer_comment|default:"None" }}"><i class="bi bi-chat-dots"></i> {{ request.business_user.first_name }}</button>
                 </td>
                 <td style="font-size: smaller;">
                     <span class="fi fi-{{ request.language.lang_iso_value}}"></span> {{ request.language.name }}

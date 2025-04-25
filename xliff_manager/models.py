@@ -113,10 +113,10 @@ class LogDiary(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_requested = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviewer', null=True, blank=True) 
     action = models.CharField(max_length=100) 
-    review_request_id = models.IntegerField(null=True, blank=True)
-    translation_request_id = models.IntegerField(null=True, blank=True)
+    review_request = models.ForeignKey('ReviewRequests', on_delete=models.CASCADE, null=True, blank=True)
+    translation_request = models.ForeignKey('TranslationsRequests', on_delete=models.CASCADE, null=True, blank=True)  
     additional_info = models.TextField(null=True, blank=True)
-    description = models.CharField(max_length=200, null=False, blank=False)
+    description = models.CharField(max_length=1000, null=False, blank=False)
     accio = models.CharField(max_length=50, choices=Action, null=True, blank=True)
 
     class Meta: 
@@ -161,7 +161,6 @@ class LogDiary(models.Model):
         super().save(*args, **kwargs)
 
 class CustomInstructions(models.Model):
-    
     id = models.AutoField(primary_key=True)
     user_last_modification = models.ForeignKey(User, on_delete=models.CASCADE)
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
@@ -173,4 +172,4 @@ class CustomInstructions(models.Model):
         #indexes = [ models.Index(fields=['-publish']), ]  
 
     def __str__(self):
-        return f"Custom instructions for {self.language} by {self.user_last_modification} in {self.date_last_modification}: {self.instructions}"   
+        return f"Custom instructions for {self.language} by {self.user_last_modification} in {self.date_last_modification}: {self.instructions}"
