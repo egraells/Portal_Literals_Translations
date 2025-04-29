@@ -84,13 +84,7 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
             with open(file_path, 'rb') as f:
                 response = HttpResponse(f.read(), content_type='application/force-download')
                 response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
-                LogDiary.objects.create(
-                    user=request.user, 
-                    action = type, 
-                    review_request_id = id if id is not None else '', 
-                    additional_info=f"File downloaded: {file_to_download}",
-                )
-                    # Update the status of the review request   
+                LogDiary.objects.create(user=request.user, action = type, review_request_id = id if id is not None else '', project = request.user.userprofile.project, additional_info=f"File downloaded: {file_to_download}")
 
                 # Only a change status is made when the requester downloads the file reviewed, as
                 # the reviewer will not be able to change the translations anymore
@@ -132,12 +126,8 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
                     reviewed_file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), f"user_reviewed_{xliff_file_name}")
                     tree.write(reviewed_file_path, encoding='utf-8', xml_declaration=True)
 
-                    LogDiary.objects.create(
-                        user=request.user, 
-                        action = 'Downloaded_Reviewed_File', 
-                        review_request_id = id if id is not None else '', 
-                        additional_info=f"File downloaded: {file_to_download}",
-                    )
+                    LogDiary.objects.create(user=request.user, action = 'Downloaded_Reviewed_File', review_request_id = id if id is not None else '', 
+                        project = request.user.userprofile.project, additional_info=f"File downloaded: {file_to_download}")
 
                     # Return the reviewed file as a downloadable response
                     with open(reviewed_file_path, 'rb') as reviewed_file:
@@ -162,12 +152,8 @@ def download_file_confirmed(request):
                 with open(file_path, 'rb') as f:
                     response = HttpResponse(f.read(), content_type='application/force-download')
                     response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
-                    LogDiary.objects.create(
-                        user=request.user, 
-                        action="Downloaded_AI_Translations",
-                        additional_info=f"File downloaded: {file_to_download}", 
-                        translation_request_id = id,
-                        )
+                    LogDiary.objects.create(user=request.user, action="Downloaded_AI_Translations", project = request.user.userprofile.project,
+                        additional_info=f"File downloaded: {file_to_download}",  translation_request_id = id)
                     return response
             else:
                 settings.LOGGER.error(f"[{timespan}] File not found: {file_path}")
@@ -238,7 +224,7 @@ def do_review_view(request, request_id):
                 ReviewRequests.objects.filter(id=request_id).update(date_reviewed_by_business = timezone.now(), status = 'Saved_Custom_Translations' )
 
                 # Log the action in the LogDiary
-                LogDiary.objects.create(user=request.user, action="Saved_Custom_Translations", review_request_id = request_id)
+                LogDiary.objects.create(user=request.user, action="Saved_Custom_Translations", project=request.user.userprofile.project, review_request_id=request_id)
 
             return render(request, 'xliff_manager/review_business_confirmation.html', 
                 {'trans_units_updated': trans_units_to_update})
@@ -246,8 +232,7 @@ def do_review_view(request, request_id):
         if action == "decline_review":
             request_to_decline = ReviewRequests.objects.get(id=request_id)
             return render(request, 'xliff_manager/review_business_decline.html', 
-                {'request': request_to_decline, 
-                'user_confirmed' : False})
+                {'request': request_to_decline, 'user_confirmed' : False})
         
         if action == "decline_request_confirmed":
             justification = request.POST.get('justification')
@@ -256,7 +241,7 @@ def do_review_view(request, request_id):
                 date_declined = timezone.now(),
                 decline_justification = justification if justification is not None else '')
             
-            LogDiary.objects.create(user=request.user, action="Declined_Request", review_request_id = request_id, additional_info=justification)
+            LogDiary.objects.create(user=request.user, action="Declined_Request", review_request_id = request_id, project = request.user.userprofile.project, additional_info=justification)
             
             request_declined = ReviewRequests.objects.get(id=request_id)
 
@@ -284,11 +269,7 @@ def do_review_view(request, request_id):
             request_reviewed.date_reviewed_by_business = timezone.now()
             request_reviewed.save()
 
-            LogDiary.objects.create(
-                    user=request.user,
-                    action="Review_Marked_as_Reviewed",
-                    review_request_id=f"{request_id}",
-            )
+            LogDiary.objects.create(user=request.user, action="Review_Marked_as_Reviewed", project=request.user.userprofile.project, review_request_id=f"{request_id}")
 
             """
             send_email(recipient=request_reviewed.technical_user.email,
@@ -324,6 +305,7 @@ def request_translation_view(request):
             if (len(trans_units) > 0 and target_language is not None):
                 trans_request = TranslationsRequests(
                     language = Languages.objects.get(id=language_id),
+                    project = request.user.userprofile.project,
                     request_user = request.user,
                     source_xliff_file = source_xliff_file.name, 
                     target_xliff_file_name = source_xliff_file.name + '_translated.xlf',
@@ -364,7 +346,7 @@ def request_translation_view(request):
 
                 trans_request.save()
 
-                LogDiary.objects.create(user = request.user, action = "Requested_Translation_to_AI", translation_request_id = f"{trans_request.id}")
+                LogDiary.objects.create(user=request.user, action="Requested_Translation_to_AI", project=request.user.userprofile.project, translation_request_id = f"{trans_request.id}")
 
                 return render(request, 'xliff_manager/request_llm_confirmation.html', 
                     {'trans_request': trans_request})
@@ -389,7 +371,7 @@ def choose_review_view(request):
         if action == 'review_selected':
             request_selected_id = request.POST.get('request_selected_id')
         
-            LogDiary.objects.create(user=request.user, action="Visualizes_Request", review_request_id=request_selected_id)
+            LogDiary.objects.create(user=request.user, action="Visualizes_Request", project = request.user.userprofile.project, review_request_id=request_selected_id)
             
             return redirect('do_request_review', request_id=request_selected_id)
 
@@ -408,7 +390,7 @@ def send_email(recipient: str, subject: str, body: str):
 def request_review_view(request):
     if request.method == 'GET':
         tags_used = ReviewRequests.objects.values_list('info_tag', flat=True).distinct()
-        reviewers = User.objects.filter(groups__name='Reviewer').values('id', 'first_name', 'last_name')
+        reviewers = User.objects.filter(groups__name='Reviewer', userprofile__project=request.user.userprofile.project).values('id', 'first_name', 'last_name')
         return render(request, 'xliff_manager/request_review.html',
             {'reviewers': reviewers,
              'languages': Languages.objects.all(),
@@ -418,6 +400,7 @@ def request_review_view(request):
         action = request.POST.get('action')
         if action == 'request_business_review':
             if request.FILES['xliff_translations_file'] and request.POST.get('business_reviewer'):
+                project = request.user.userprofile.project
                 language_selected = request.POST.get('language')
                 language_id = Languages.objects.get(id=language_selected).id
                 uploaded_xliff_file = request.FILES['xliff_translations_file']
@@ -431,6 +414,7 @@ def request_review_view(request):
                     language_id = language_id,
                     technical_user = request.user,
                     business_user = reviewer,
+                    project = project,
                     #target_xliff_file = uploaded_xliff_file,
                     requester_comment = requester_comment,
                     info_tag = tag
@@ -477,8 +461,7 @@ def request_review_view(request):
 
                 # Log the action in the LogDiary
                 LogDiary.objects.create(user=request.user, user_requested=User.objects.get(id=business_reviewer),
-                    action="Requested_Business_Review", review_request_id=f"{review_request.id}",
-                )
+                    project = request.user.userprofile.project, action="Requested_Business_Review", review_request_id=f"{review_request.id}")
 
                 # return HttpResponse(f"File uploaded successfully: {uploaded_xliff_file}, Release: {new_release}")
                 return render(request, 'xliff_manager/review_request_confirmation.html', 
@@ -504,7 +487,7 @@ def check_request_status_view(request):
 @login_required
 def diary_log_view(request):
     if request.method == 'GET':
-        activity_list = LogDiary.objects.all()
+        activity_list = LogDiary.objects.filter(project=request.user.userprofile.project) if request.user.userprofile.project.id > 0 else LogDiary.objects.all()
         return render(request, 'xliff_manager/diary_log.html', 
             {'activity_list': activity_list})
 
@@ -516,7 +499,7 @@ def load_translations(request):
 def custom_instructions_view(request):
     
     if request.method == 'GET':
-        custom_instructions = CustomInstructions.objects.all().order_by('language__name')
+        custom_instructions = CustomInstructions.objects.filter(project=request.user.userprofile.project).order_by('language__name')
         translations_adjusted_by_reviewers = []
         translations_with_differences = Translations_Units.objects.exclude(reviewer_translation__exact='').order_by('-date_reviewed')
         for translation in translations_with_differences:
@@ -545,11 +528,11 @@ def custom_instructions_view(request):
         custom_instruction = CustomInstructions.objects.get(id=instruction_id)
         custom_instruction.instructions = instruction_text
         custom_instruction.user_last_modification = request.user
+        custom_instruction.project = request.user.userprofile.project
         custom_instruction.save()
 
         # Log the action in the LogDiary
-        LogDiary.objects.create(user = request.user, action = "Saved_Custom_Instructions",
-        )
+        LogDiary.objects.create(user = request.user, action = "Saved_Custom_Instructions", project = request.user.userprofile.project)
         
         return render(request, 'xliff_manager/custom_instructions_confirmation.html', {'num_records': len(custom_instructions)})
 
