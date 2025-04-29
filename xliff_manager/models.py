@@ -5,7 +5,27 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 
-# Create your models here.
+
+class Projects(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_last_modified = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
+# Extend User with a Profile to add custom fields
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    project = models.ForeignKey('Projects', on_delete=models.PROTECT, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.project.name}"
+
+
 class Languages(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -19,12 +39,13 @@ class Languages(models.Model):
 class TranslationsRequests(models.Model):
 
     def upload_to_folder(instance, filename):   
-        #This function is not strictly necessary in this form, 
+        # This function is not strictly necessary in this form, 
         # but it is useful to have it in case we need to change 
         # the folder structure in the future
         return os.path.join(settings.TRANS_REQUESTS_FOLDER, filename)
     
     id = models.AutoField(primary_key=True)
+    project = models.ForeignKey('Projects', on_delete=models.CASCADE, default='0')
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
     request_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='request_user', null=False, blank=False)
     source_xliff_file = models.FileField(upload_to=upload_to_folder, blank=False)
@@ -38,7 +59,6 @@ class TranslationsRequests(models.Model):
     status = models.CharField(max_length=100, default='Created') # Created, Sent_to_LLM, Received_from_LLM
 
     def save(self, *args, **kwargs):
-
         if self.status == 'Created':
             # Every time a new translation request is created, we need to send it to the LLM
             # Create a new thread to send translations to the LLM
@@ -73,6 +93,7 @@ class TranslationsRequests(models.Model):
 
 class ReviewRequests(models.Model):
     id = models.AutoField(primary_key=True)
+    project = models.ForeignKey('Projects', on_delete=models.CASCADE, default='0')
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
     technical_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='technical_requester', null=False, blank=False) 
     business_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='business_receiver', null=False, blank=False) 
@@ -109,6 +130,7 @@ class LogDiary(models.Model):
         EN_REVISIO = 'RV', 'REvision'
     
     id = models.AutoField(primary_key=True)
+    project = models.ForeignKey('Projects', on_delete=models.CASCADE, default='0')
     date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_requested = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviewer', null=True, blank=True) 
@@ -162,6 +184,7 @@ class LogDiary(models.Model):
 
 class CustomInstructions(models.Model):
     id = models.AutoField(primary_key=True)
+    project = models.ForeignKey('Projects', on_delete=models.CASCADE, default='0')
     user_last_modification = models.ForeignKey(User, on_delete=models.CASCADE)
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
     instructions = models.TextField(null=True, blank=True)
