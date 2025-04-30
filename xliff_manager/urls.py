@@ -8,7 +8,6 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('home/', views.home, name='home'),
     path('request_translation/', views.request_translation_view, name='request_translation'),
-    path('request_translation?start_new=True', views.request_translation_view, name='start_new'),
 
     path('request_review/', views.request_review_view, name='request_review'),
     path('review_request/<int:request_id>/', views.do_review_view, name='do_request_review'),
