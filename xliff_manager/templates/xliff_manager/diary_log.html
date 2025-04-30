@@ -17,6 +17,9 @@
         <span class="badge text-bg-dark rounded-pill">Request Id (translation or review)</span> 
         <span class="badge text-bg-light rounded-pill">Language involved</span>
         <span class="badge text-bg-secondary rounded-pill">Details</span>
+        {% if user.userprofile.project.id == 0 %}
+            <span class="badge text-bg-success rounded-pill"><i class="bi bi-person"></i> Project</span>
+        {% endif %}
     </div>
 
 <h2 style="margin-top: 50px">Diary Log (newer to older)</h5>
