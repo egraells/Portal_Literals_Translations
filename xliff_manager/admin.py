@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Languages, TranslationsRequests, Translations_Units, ReviewRequests, LogDiary, CustomInstructions
+from .models import Languages, TranslationsRequests, Translations_Units, ReviewRequests, LogDiary, CustomInstructions, UserProfile
 
 # Per gestionar la base dades desde Admin Panel
 
@@ -21,6 +21,8 @@ class LogDiaryAdmin(admin.ModelAdmin):
 class CustomInstructionsAdmin(admin.ModelAdmin):
     pass
 
+class UserProfileAdmin(admin.ModelAdmin):
+    pass
 
 admin.site.register(Languages, LanguagesAdmin) 
 admin.site.register(TranslationsRequests, TranslationsRequestsAdmin) 
@@ -28,4 +30,5 @@ admin.site.register(Translations_Units, Translations_UnitsAdmin)
 admin.site.register(ReviewRequests, ReviewRequestsAdmin) 
 admin.site.register(LogDiary, LogDiaryAdmin) 
 admin.site.register(CustomInstructions, CustomInstructionsAdmin) 
+admin.site.register(UserProfile, UserProfileAdmin) 
 # Register your models here.
