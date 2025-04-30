@@ -450,7 +450,7 @@ def request_review_view(request):
                 # Create the directory if it doesn't exist
                 if not os.path.exists(location):
                     os.makedirs(location, exist_ok=True)
-                    os.chmod(location, 0o777)  # 777 means read/write/exec for everyone (for folders)
+                    os.chmod(location, 0o664)  # 664 means read/write for owner and group, read for others 
 
                 # Create the FileSystemStorage
                 fs = FileSystemStorage(location=location, base_url=settings.MEDIA_URL + settings.REV_REQUESTS_FOLDER + f'/{review_request.id}/')
