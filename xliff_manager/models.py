@@ -19,7 +19,7 @@ class Projects(models.Model):
 # Extend User with a Profile to add custom fields
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    project = models.ForeignKey('Projects', on_delete=models.PROTECT, null=True, blank=True)
+    project = models.ForeignKey('Projects', on_delete=models.PROTECT)
 
     def __str__(self):
         return f"{self.user.username} - {self.project.name}"
