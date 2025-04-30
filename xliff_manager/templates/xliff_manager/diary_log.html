@@ -60,8 +60,15 @@
                     </span>
                 {% endif %}
                 
+                
                 {% if activity.additional_info %}
                     <span class="badge text-bg-light rounded-pill">Details</span>{{ activity.additional_info|default_if_none:'None' }}
+                {% endif %}
+
+                {% if user.userprofile.project.id == 0 %}
+                    <span class="badge text-bg-success rounded-pill">
+                        <i class="bi bi-diagram-3"></i> {{ activity.user.userprofile.project.name }} 
+                    </span>
                 {% endif %}
 
             {% else %}
