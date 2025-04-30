@@ -43,7 +43,7 @@ class TranslationsRequests(models.Model):
         # the folder structure in the future
         return os.path.join(settings.TRANS_REQUESTS_FOLDER, filename)
     
-    project = models.ForeignKey('Projects', on_delete=models.CASCADE, default='0')
+    project = models.ForeignKey('Projects', on_delete=models.CASCADE, default=0)
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
     request_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='request_user', null=False, blank=False)
     source_xliff_file = models.FileField(upload_to=upload_to_folder, blank=False)
