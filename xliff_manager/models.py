@@ -120,10 +120,6 @@ class Translations_Units(models.Model):
 
 
 class LogDiary(models.Model):
-    class Action(models.TextChoices): 
-        Requested_Translation_to_AI = 'RRTTLLM', 'Requested_Translation_to_AI'   
-        TRANSLATION_RECEIVED_FROM_LLM = 'TRFLLM', 'Translation_Received_from_LLM'  
-        EN_REVISIO = 'RV', 'REvision'
     
     project = models.ForeignKey('Projects', on_delete=models.CASCADE, default='0')
     date = models.DateTimeField(auto_now_add=True)
@@ -134,7 +130,6 @@ class LogDiary(models.Model):
     translation_request = models.ForeignKey('TranslationsRequests', on_delete=models.CASCADE, null=True, blank=True)  
     additional_info = models.TextField(null=True, blank=True)
     description = models.CharField(max_length=1000, null=False, blank=False)
-    accio = models.CharField(max_length=50, choices=Action, null=True, blank=True)
 
     class Meta: 
         ordering = ['-date']
