@@ -395,6 +395,7 @@ def choose_review_view(request):
 
 @login_required
 def send_email(recipient: str, subject: str, body: str):
+    """
     if settings.SEND_EMAILS:
         postmark = PostmarkClient(server_token='fa9cda4a-0124-4b7a-9ad3-aadf18636cae')
         postmark.emails.send(
@@ -402,7 +403,7 @@ def send_email(recipient: str, subject: str, body: str):
         To=recipient,
         Subject=subject,
         HtmlBody=f'<html><body><strong>{body}</body></html>'
-)
+    )"""
 
 @login_required
 def request_review_view(request):
