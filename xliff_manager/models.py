@@ -7,7 +7,6 @@ from django.conf import settings
 
 
 class Projects(models.Model):
-    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -44,7 +43,6 @@ class TranslationsRequests(models.Model):
         # the folder structure in the future
         return os.path.join(settings.TRANS_REQUESTS_FOLDER, filename)
     
-    id = models.AutoField(primary_key=True)
     project = models.ForeignKey('Projects', on_delete=models.CASCADE, default='0')
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
     request_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='request_user', null=False, blank=False)
@@ -92,7 +90,6 @@ class TranslationsRequests(models.Model):
         super().save(*args, **kwargs)
 
 class ReviewRequests(models.Model):
-    id = models.AutoField(primary_key=True)
     project = models.ForeignKey('Projects', on_delete=models.CASCADE, default='0')
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
     technical_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='technical_requester', null=False, blank=False) 
@@ -108,7 +105,6 @@ class ReviewRequests(models.Model):
     status = models.CharField(max_length=100, default='Requested') # Requested, Reviewed, Declined, Downloaded
 
 class Translations_Units(models.Model):
-    id = models.AutoField(primary_key=True)
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
     request = models.ForeignKey('ReviewRequests', on_delete=models.CASCADE)
     salesforce_id = models.TextField()
@@ -129,7 +125,6 @@ class LogDiary(models.Model):
         TRANSLATION_RECEIVED_FROM_LLM = 'TRFLLM', 'Translation_Received_from_LLM'  
         EN_REVISIO = 'RV', 'REvision'
     
-    id = models.AutoField(primary_key=True)
     project = models.ForeignKey('Projects', on_delete=models.CASCADE, default='0')
     date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -183,7 +178,6 @@ class LogDiary(models.Model):
         super().save(*args, **kwargs)
 
 class CustomInstructions(models.Model):
-    id = models.AutoField(primary_key=True)
     project = models.ForeignKey('Projects', on_delete=models.CASCADE, default='0')
     user_last_modification = models.ForeignKey(User, on_delete=models.CASCADE)
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
