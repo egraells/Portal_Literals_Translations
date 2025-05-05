@@ -6,6 +6,7 @@
 
         <h1 class="mb-4"><i class="bi bi-journal-text"></i>Requests status</h1>
         <a href="{% url 'home' %}" class="btn btn-outline-primary">Back to Home</a>
+        <a href="{% url 'home' %}" class="btn btn-outline-primary">Refresh Status</a>
         <div style="margin-top: 15px; margin-bottom: 15px">
             <ul>
                 <li>All requests are shown from newer to older <i class="bi bi-arrow-down-circle"></i>
@@ -49,8 +50,9 @@
                         </td>
                         <td>{{ request.date_created|date:"Y/m/d H:i" }}</td>
                         <td>
-                            {% if request.status == "Created" %}
-                                <img src="https://raw.githubusercontent.com/n3r4zzurr0/svg-spinners/abfa05c49acf005b8b1e0ef8eb25a67a7057eb20/svg-css/wind-toy.svg" alt="Loading..." width="20" height="20" style="margin-top: 5px; margin-bottom: 5px;">
+                            {% if request.status == "Started_on_LLM" %}
+                            {% load static %}
+                                <img src="{% static 'images/wind-toy.svg' %}" alt="Loading..." width="20" height="20" style="margin-top: 5px; margin-bottom: 5px;">
                                 Translating ...
                             {% else %}
                                 {{ request.date_received_from_llm|date:"Y/m/d H:i" }}

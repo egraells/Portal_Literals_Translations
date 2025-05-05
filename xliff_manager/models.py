@@ -55,9 +55,9 @@ class TranslationsRequests(models.Model):
     literals_to_exclude_file = models.FileField(upload_to=upload_to_folder)
     literalpatterns_to_exclude_file = models.FileField(upload_to=upload_to_folder)
     date_created = models.DateTimeField(auto_now_add=True)
-    date_sent_to_llm = models.DateTimeField(null=True, blank=True)    
+    date_started_on_llm = models.DateTimeField(null=True, blank=True)    
     date_received_from_llm = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=100, default='Created') # Created, Sent_to_LLM, Received_from_LLM
+    status = models.CharField(max_length=100, default='Created') 
 
     def save(self, *args, **kwargs):
         if self.status == 'Created':
@@ -77,14 +77,14 @@ class TranslationsRequests(models.Model):
             translation_thread.start()
             """
 
-        elif self.status == 'Sent_to_LLM':
-            self.date_sent_to_llm = timezone.now()
+        elif self.status == 'Started_on_LLM':
+            self.date_started_on_llm = timezone.now()
+        
         elif self.status == 'Received_from_LLM':
             self.date_received_from_llm = timezone.now()
-            LogDiary.objects.create(
-                user=1, action="Translation_Received_from_LLM", review_request_id=f"{self.id}",
-                additional_info=f"The LLM has translated the request Id: {self.id}. The user assigned is 1.",
-            )
+        
+        elif self.status == 'Error_from_AI':
+            pass
         else:
             print(f"ERROR: Unknown status: {self.status}")
         
@@ -130,7 +130,7 @@ class LogDiary(models.Model):
     review_request = models.ForeignKey('ReviewRequests', on_delete=models.CASCADE, null=True, blank=True)
     translation_request = models.ForeignKey('TranslationsRequests', on_delete=models.CASCADE, null=True, blank=True)  
     additional_info = models.TextField(null=True, blank=True)
-    description = models.CharField(max_length=1000, null=False, blank=False)
+    description = models.CharField(max_length=1000, null=True, blank=True)
 
     class Meta: 
         ordering = ['-date']

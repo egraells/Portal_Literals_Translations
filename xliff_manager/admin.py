@@ -19,7 +19,7 @@ class LanguagesAdmin(admin.ModelAdmin):
 
 
 class TranslationsRequestsAdmin(admin.ModelAdmin):
-    list_display = ('project', 'language', 'request_user', 'source_xliff_file', 'target_xliff_file_name', 'prompt_addition_file', 'literals_to_exclude_file', 'literalpatterns_to_exclude_file', 'date_created', 'date_sent_to_llm', 'date_received_from_llm',  'status')
+    list_display = ('project', 'language', 'request_user', 'source_xliff_file', 'target_xliff_file_name', 'prompt_addition_file', 'literals_to_exclude_file', 'literalpatterns_to_exclude_file', 'date_created', 'date_started_on_llm', 'date_received_from_llm',  'status')
     list_filter = ('status', 'project')
     search_fields = ('technical_user__username', 'business_user__username', 'info_tag')
     list_display_links = ('request_user', 'project')

@@ -31,7 +31,7 @@
     {% for activity in activity_list%}
     <ul class="list-group list-group-flush">
         <li class="list-group-item" style="padding-top:2px; padding-bottom:2px; ">
-            {% if activity.action == 'Requested_Translation_to_AI' or activity.action == 'Translation_Received_from_AI' or activity.action == 'Requested_Business_Review' or activity.action == 'Visualizes_Request' or activity.action == 'Review_Marked_as_Reviewed' or activity.action == 'Reviewer_Saves_Custom_Translations' or activity.action == 'Requester_Downloaded_Review' or activity.action == 'Saved_Custom_Translations' or activity.action == 'Saved_Custom_Instructions' or activity.action == 'Declined_Request' or activity.action == 'Downloaded_AI_Translations' or activity.action == 'translations_request_original_file' or activity.action == 'Downloaded_Reviewed_File'%}
+            {% if activity.action == 'Requested_Translation_to_AI' or activity.action == 'Translation_Started_on_AI' or activity.action == 'Translation_Received_from_AI' or activity.action == 'Requested_Business_Review' or activity.action == 'Visualizes_Request' or activity.action == 'Review_Marked_as_Reviewed' or activity.action == 'Reviewer_Saves_Custom_Translations' or activity.action == 'Requester_Downloaded_Review' or activity.action == 'Saved_Custom_Translations' or activity.action == 'Saved_Custom_Instructions' or activity.action == 'Declined_Request' or activity.action == 'Downloaded_AI_Translations' or activity.action == 'translations_request_original_file' or activity.action == 'Downloaded_Reviewed_File'%}
                 <span class="badge text-bg-warning rounded-pill">
                     <i class="bi bi-calendar-date"></i>
                     {{ activity.date|date:"Y/m/d H:i" }} 
@@ -68,9 +68,8 @@
                     </span>
                 {% endif %}
                 
-                
                 {% if activity.additional_info %}
-                    <span class="badge text-bg-light rounded-pill">Details</span>{{ activity.additional_info|default_if_none:'None' }}
+                    <span class="badge text-bg-light rounded-pill">Details: {{ activity.additional_info|default_if_none:'None' }}</span>
                 {% endif %}
 
                 {% if user.userprofile and user.userprofile.project.id == 0 %}
