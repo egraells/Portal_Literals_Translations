@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.utils.text import get_valid_filename
 
 
 class Projects(models.Model):
@@ -22,7 +23,8 @@ class UserProfile(models.Model):
     project = models.ForeignKey('Projects', on_delete=models.PROTECT)
 
     def __str__(self):
-        return f"{self.user.username} - {self.project.name}"
+        project_name = self.project.name if self.project else 'No Project'
+        return f"{self.user.username} - {project_name}"
 
 
 class Languages(models.Model):
@@ -41,6 +43,7 @@ class TranslationsRequests(models.Model):
         # This function is not strictly necessary in this form, 
         # but it is useful to have it in case we need to change 
         # the folder structure in the future
+        filename = get_valid_filename(filename) # TODO: test this
         return os.path.join(settings.TRANS_REQUESTS_FOLDER, filename)
     
     project = models.ForeignKey('Projects', on_delete=models.CASCADE, default=0)
@@ -79,10 +82,8 @@ class TranslationsRequests(models.Model):
         elif self.status == 'Received_from_LLM':
             self.date_received_from_llm = timezone.now()
             LogDiary.objects.create(
-                user=1,
-                action="Translation_Received_from_LLM",
-                review_request_id=f"{self.id}",
-                additional_info=f"The LLM has resolved the request for the request Id: {self.id}. The user assigned is 1.",
+                user=1, action="Translation_Received_from_LLM", review_request_id=f"{self.id}",
+                additional_info=f"The LLM has translated the request Id: {self.id}. The user assigned is 1.",
             )
         else:
             print(f"ERROR: Unknown status: {self.status}")
