@@ -38,7 +38,7 @@ class Languages(models.Model):
         return self.name
 
 class TranslationsRequests(models.Model):
-
+    # Status: Created, Started_on_LLM, Received_from_LLM, Error_from_AI
     def upload_to_folder(instance, filename):   
         # This function is not strictly necessary in this form, 
         # but it is useful to have it in case we need to change 
@@ -158,15 +158,15 @@ class LogDiary(models.Model):
                 self.description = f"{self.additional_info}"
             case "Review_Marked_as_Reviewed":
                 self.description = f"{self.additional_info}"
-            case "Requester_Downloaded_Review":
+            case "Requester_Download_Review":
                 self.description = f"{self.additional_info}"
             case "Saved_Custom_Translations":
                 self.description = f"{self.additional_info}"
             case "Saved_Custom_Instructions":
                 self.description = f"{self.additional_info}"   
-            case "translations_request_original_file":
+            case "Download_trans_request_source_file":
                 self.description = f"{self.additional_info}"
-            case "translations_request_AItranslated_file_confirmed":
+            case "Download_trans_request_AItranslated_file_confirmed":
                 self.description = f"{self.additional_info}"
             case _:
                 self.description = f"Action: {self.action} at {date_format}  - Additional Info: {self.additional_info}"

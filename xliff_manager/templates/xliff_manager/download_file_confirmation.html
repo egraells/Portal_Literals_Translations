@@ -33,7 +33,7 @@
                 <div class="d-flex justify-content-center" style="margin-top: 20px">
                     <form method="post" action="{% url 'download_file_confirmed' %}">
                         {% csrf_token %}
-                        <input type="hidden" name="type" value="translations_request_AItranslated_file_confirmed">
+                        <input type="hidden" name="type" value="Download_trans_request_AItranslated_file_confirmed">
                         <input type="hidden" name="id" value="{{ id }}">
                         <input type="hidden" name="file_to_download" value="{{ file_to_download }}">
                         <button type="submit" class="btn btn-primary d-none" id="download-link">Download</button>

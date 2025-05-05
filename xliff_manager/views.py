@@ -61,21 +61,19 @@ def is_user_allowed_to_download(user, type, id):
     # Check if the user is allowed to download the file based on the type and id
     
     user_data = User.objects.select_related('userprofile__project').get(id=user.id)
-    if  type in ['translations_request_AItranslated_file', 'translations_request_original_file', 'translations_request_AItranslated_file_confirmed']:
+    if  type in ['Download_trans_request_AItranslated_file', 'Download_trans_request_source_file', 'Download_trans_request_AItranslated_file_confirmed']:
             trans_request_associated_project = TranslationsRequests.objects.get(id=id).project
             return user_data.userprofile.project.id == trans_request_associated_project.id or user.is_superuser or user.is_staff
     
-    elif type in ['review_request_source_file', 'review_request_target_file']:
+    elif type in ['Download_review_request_source_file', 'Download_review_request_target_file']:
         review_request_associated_project = ReviewRequests.objects.get(id=id).project 
         return user_data.userprofile.project.id == review_request_associated_project.id or user.is_superuser or user.is_staff
     
 def id_exists(id, type):
     # Check if the user is allowed to download the file based on the type and id
-    
-    if  type in ['translations_request_AItranslated_file', 'translations_request_original_file', 'translations_request_AItranslated_file_confirmed']:
+    if  type in ['Download_trans_request_AItranslated_file', 'Download_trans_request_source_file', 'Download_trans_request_AItranslated_file_confirmed']:
         return TranslationsRequests.objects.filter(id=id).exists()
-    
-    elif type in ['review_request_source_file', 'review_request_target_file']:
+    elif type in ['Download_review_request_source_file', 'Download_review_request_target_file']:
         return ReviewRequests.objects.filter(id=id).exists()
     
 
@@ -92,19 +90,19 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
         return HttpResponse("You are not allowed to download the requested file", status=400)
 
     # Requires explicit confirmation from the user to comply with Novartis SOP
-    if request.method == 'GET' and type == 'translations_request_AItranslated_file':
+    if request.method == 'GET' and type == 'Download_trans_request_AItranslated_file':
         return render(request, 'xliff_manager/download_file_confirmation.html', {
             'id': id, 'file_to_download': file_to_download, 'type': type,
         })
     
-    elif request.method == 'GET' and (type in ["review_request_source_file", 
-                                                "translations_request_original_file", 
-                                                "translations_request_AItranslated_file_confirmed"]):
-        
+    elif request.method == 'GET' and\
+        (type in [ "Download_review_request_source_file", 
+                    "Download_trans_request_source_file", 
+                    "Download_trans_request_AItranslated_file_confirmed"]):
         # Build the right path
-        if type == 'review_request_source_file':
+        if type == 'Download_review_request_source_file':
             file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), file_to_download)
-        elif type in ['translations_request_AItranslated_file_confirmed', 'translations_request_original_file']:
+        elif type in ['Download_trans_request_AItranslated_file_confirmed', 'Download_trans_request_source_file']:
             file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
 
         settings.LOGGER.debug(f"File path to download: {file_path}")
@@ -115,18 +113,18 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
 
                 # Only a change status is made when the requester downloads the file reviewed, as
                 # the reviewer will not be able to change the translations anymore
-                if type == 'Requester_Downloaded_Review':
-                    ReviewRequests.objects.filter(id=id).update(status = 'Requester_Downloaded_Review')
+                if type == 'Requester_Download_Review':
+                    ReviewRequests.objects.filter(id=id).update(status = 'Requester_Download_Review')
         
             # Update Log
-            if type == 'review_request_source_file':
+            if type == 'Download_review_request_source_file':
                 LogDiary.objects.create(user = request.user, action = type, review_request_id = id, project = user_project, additional_info=f"File downloaded: {file_to_download}")
-            elif type in ['translations_request_original_file', 'translations_request_AItranslated_file_confirmed']:
+            elif type in ['Download_trans_request_source_file', 'Download_trans_request_AItranslated_file_confirmed']:
                 LogDiary.objects.create(user = request.user, action = type, translation_request_id = id, project = user_project, additional_info=f"File downloaded: {file_to_download}")
 
             return response
         
-    elif type == 'review_request_target_file':
+    elif type == 'Download_review_request_target_file':
         # Cal construir el fitxer amb les modificacions del usuari
 
         # From the review_request model obtains the target_xliff_file
@@ -159,7 +157,7 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
                 reviewed_file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), f"user_reviewed_{xliff_file_name}")
                 tree.write(reviewed_file_path, encoding='utf-8', xml_declaration=True)
 
-                LogDiary.objects.create(user=request.user, action = 'Downloaded_Reviewed_File', review_request_id = id if id is not None else '', 
+                LogDiary.objects.create(user=request.user, action = 'Download_Reviewed_File', review_request_id = id if id is not None else '', 
                     project = user_project, additional_info=f"File downloaded: {file_to_download}")
 
                 # Return the reviewed file as a downloadable response
@@ -182,13 +180,13 @@ def download_file_confirmed(request):
         id = request.POST.get('id')
         file_to_download = request.POST.get('file_to_download')
 
-        if type == 'translations_request_AItranslated_file_confirmed':
+        if type == 'Download_trans_request_AItranslated_file_confirmed':
             file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
             if os.path.exists(file_path):
                 with open(file_path, 'rb') as f:
                     response = HttpResponse(f.read(), content_type='application/force-download')
                     response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
-                    LogDiary.objects.create(user=request.user, action="Downloaded_AI_Translations", project = user_project,
+                    LogDiary.objects.create(user=request.user, action="Download_AI_Translations", project = user_project,
                         additional_info=f"File downloaded: {file_to_download}",  translation_request_id = id)
                     return response
             else:

@@ -94,7 +94,7 @@
                 <td style="font-size: smaller;">{{ request.info_tag|default_if_none:"-" }}</td>
                 <td style="font-size: smaller;">{{ request.date_reviewed_by_business|date:"Y/m/d"|default:"Never Reviewed" }}</td>
                 <td>
-                    <a href="{% url 'download_file' type='review_request_source_file' id=request.id file_to_download=request.target_xliff_file %}" 
+                    <a href="{% url 'download_file' type='Download_review_request_source_file' id=request.id file_to_download=request.target_xliff_file %}" 
                         class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
                 </td>
             </tr>
