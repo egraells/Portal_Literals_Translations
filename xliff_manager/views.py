@@ -1,5 +1,4 @@
 import os
-import shutil
 from datetime import datetime
 import xml.etree.ElementTree as ET
 from urllib.parse import unquote
@@ -10,10 +9,8 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
-from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django.db.models import F
-from django.http import FileResponse, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 from django.core.files.storage import FileSystemStorage
@@ -60,22 +57,49 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'xliff_manager/login.html', {'form': form})
 
+def is_user_allowed_to_download(user, type, id):
+    # Check if the user is allowed to download the file based on the type and id
+    
+    user_data = User.objects.select_related('userprofile__project').get(id=user.id)
+    if  type in ['translations_request_AItranslated_file', 'translations_request_original_file', 'translations_request_AItranslated_file_confirmed']:
+            trans_request_associated_project = TranslationsRequests.objects.get(id=id).project
+            return user_data.userprofile.project.id == trans_request_associated_project.id or user.is_superuser or user.is_staff
+    
+    elif type in ['review_request_source_file', 'review_request_target_file']:
+        review_request_associated_project = ReviewRequests.objects.get(id=id).project 
+        return user_data.userprofile.project.id == review_request_associated_project.id or user.is_superuser or user.is_staff
+    
+def id_exists(id, type):
+    # Check if the user is allowed to download the file based on the type and id
+    
+    if  type in ['translations_request_AItranslated_file', 'translations_request_original_file', 'translations_request_AItranslated_file_confirmed']:
+        return TranslationsRequests.objects.filter(id=id).exists()
+    
+    elif type in ['review_request_source_file', 'review_request_target_file']:
+        return ReviewRequests.objects.filter(id=id).exists()
+    
+
 @login_required
 def download_file(request, type:str=None, id:str=None, file_to_download:str=None):
 
     user_data = User.objects.select_related('userprofile__project').get(id=request.user.id)
     user_project = user_data.userprofile.project
 
-    # Requires explicit confirmation from the user
+    if not id_exists(id, type):
+        return HttpResponse("The Id requested does not exist", status=400)
+        
+    if not is_user_allowed_to_download(request.user, type, id):
+        return HttpResponse("You are not allowed to download the requested file", status=400)
+
+    # Requires explicit confirmation from the user to comply with Novartis SOP
     if request.method == 'GET' and type == 'translations_request_AItranslated_file':
         return render(request, 'xliff_manager/download_file_confirmation.html', {
-            'id': id,
-            'file_to_download': file_to_download,
-            'type': type,
+            'id': id, 'file_to_download': file_to_download, 'type': type,
         })
     
-    if request.method == 'GET' and (type in ["review_request_source_file", 
-                                             "translations_request_original_file", "translations_request_AItranslated_file_confirmed"]):
+    elif request.method == 'GET' and (type in ["review_request_source_file", 
+                                                "translations_request_original_file", 
+                                                "translations_request_AItranslated_file_confirmed"]):
         
         # Build the right path
         if type == 'review_request_source_file':
@@ -88,59 +112,64 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
             with open(file_path, 'rb') as f:
                 response = HttpResponse(f.read(), content_type='application/force-download')
                 response['Content-Disposition'] = f'attachment; filename="{file_to_download}"'
-                LogDiary.objects.create(user=request.user, action = type, review_request_id = id if id is not None else '', project = user_project, additional_info=f"File downloaded: {file_to_download}")
 
                 # Only a change status is made when the requester downloads the file reviewed, as
                 # the reviewer will not be able to change the translations anymore
                 if type == 'Requester_Downloaded_Review':
                     ReviewRequests.objects.filter(id=id).update(status = 'Requester_Downloaded_Review')
+        
+            # Update Log
+            if type == 'review_request_source_file':
+                LogDiary.objects.create(user = request.user, action = type, review_request_id = id, project = user_project, additional_info=f"File downloaded: {file_to_download}")
+            elif type in ['translations_request_original_file', 'translations_request_AItranslated_file_confirmed']:
+                LogDiary.objects.create(user = request.user, action = type, translation_request_id = id, project = user_project, additional_info=f"File downloaded: {file_to_download}")
 
-                return response
+            return response
         
     elif type == 'review_request_target_file':
-            # Cal construir el fitxer amb les modificacions del usuari
+        # Cal construir el fitxer amb les modificacions del usuari
 
-            # From the review_request model obtains the target_xliff_file
-            review_request = ReviewRequests.objects.get(id=id)
-            xliff_file_path_url = review_request.target_xliff_file.url #/media/filename.xliff
-            xliff_file_name = unquote(xliff_file_path_url.replace('/media/', '', 1))
-            xliff_file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), xliff_file_name)
+        # From the review_request model obtains the target_xliff_file
+        review_request = ReviewRequests.objects.get(id=id)
+        xliff_file_path_url = review_request.target_xliff_file.url #/media/filename.xliff
+        xliff_file_name = unquote(xliff_file_path_url.replace('/media/', '', 1))
+        xliff_file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), xliff_file_name)
 
-            # Fetch all translation units where ai_translation and reviewer_translation differ
-            translation_units = Translations_Units.objects.filter(
-                request_id=id
-            ).exclude(reviewer_translation__exact='')
-            user_modified_trans_unit_ids = translation_units.values_list('salesforce_id', flat=True)
+        # Fetch all translation units where ai_translation and reviewer_translation differ
+        translation_units = Translations_Units.objects.filter(
+            request_id=id
+        ).exclude(reviewer_translation__exact='')
+        user_modified_trans_unit_ids = translation_units.values_list('salesforce_id', flat=True)
 
-            if os.path.exists(xliff_file_path):
-                with open(xliff_file_path, 'rb') as f:
-                    tree = ET.parse(f)
-                    root = tree.getroot()
-                    
-                    trans_units = []
-                    for unit in root.findall(".//trans-unit"):
-                        trans_unit_id = unit.get('id')
-                        if trans_unit_id in user_modified_trans_unit_ids:
-                            target_node = unit.find('target')
-                            reviewer_translation = translation_units.get(salesforce_id=trans_unit_id).reviewer_translation
-                            target_node.text = reviewer_translation
+        if os.path.exists(xliff_file_path):
+            with open(xliff_file_path, 'rb') as f:
+                tree = ET.parse(f)
+                root = tree.getroot()
+                
+                trans_units = []
+                for unit in root.findall(".//trans-unit"):
+                    trans_unit_id = unit.get('id')
+                    if trans_unit_id in user_modified_trans_unit_ids:
+                        target_node = unit.find('target')
+                        reviewer_translation = translation_units.get(salesforce_id=trans_unit_id).reviewer_translation
+                        target_node.text = reviewer_translation
 
-                    # Generate the reviewed file    
-                    # Write the modified tree to a new XML file
-                    reviewed_file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), f"user_reviewed_{xliff_file_name}")
-                    tree.write(reviewed_file_path, encoding='utf-8', xml_declaration=True)
+                # Generate the reviewed file    
+                # Write the modified tree to a new XML file
+                reviewed_file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), f"user_reviewed_{xliff_file_name}")
+                tree.write(reviewed_file_path, encoding='utf-8', xml_declaration=True)
 
-                    LogDiary.objects.create(user=request.user, action = 'Downloaded_Reviewed_File', review_request_id = id if id is not None else '', 
-                        project = user_project, additional_info=f"File downloaded: {file_to_download}")
+                LogDiary.objects.create(user=request.user, action = 'Downloaded_Reviewed_File', review_request_id = id if id is not None else '', 
+                    project = user_project, additional_info=f"File downloaded: {file_to_download}")
 
-                    # Return the reviewed file as a downloadable response
-                    with open(reviewed_file_path, 'rb') as reviewed_file:
-                        response = HttpResponse(reviewed_file.read(), content_type='application/force-download')
-                        response['Content-Disposition'] = f'attachment; filename="reviewed_{xliff_file_name}"'
-                        return response
+                # Return the reviewed file as a downloadable response
+                with open(reviewed_file_path, 'rb') as reviewed_file:
+                    response = HttpResponse(reviewed_file.read(), content_type='application/force-download')
+                    response['Content-Disposition'] = f'attachment; filename="reviewed_{xliff_file_name}"'
+                    return response
     else:    
         return HttpResponse("File not found", status=404)
-           
+            
     return HttpResponse("Invalid request", status=400)
 
 @login_required
@@ -170,7 +199,6 @@ def read_xliff_file(xliff_file):
     try: 
         tree = ET.parse(xliff_file)
         root = tree.getroot()
-        
         trans_units = []
         for unit in root.findall(".//trans-unit"):
             id = unit.get('id')
@@ -205,8 +233,6 @@ def do_review_view(request, request_id):
             'translations': translations,
         })
     
-
-
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == "save_changes":
