@@ -433,12 +433,19 @@ def send_email(recipient: str, subject: str, body: str):
 def request_review_view(request):
     user_data = User.objects.select_related('userprofile__project').get(id=request.user.id)
     user_project = user_data.userprofile.project
+    if user_project.id == 0:
+        tags_used = list(set(ReviewRequests.objects.all().values_list('info_tag', flat=True))) # Get all unique tags used in the review requests for all projects
+    else:
+        tags_used = list(set(ReviewRequests.objects.filter(project=user_project).values_list('info_tag', flat=True))) # Get all unique tags used in the review requests for the current user project
+
+    tags_used = [tag for tag in tags_used if tag] # Remove empty tags
+    tags_used.sort()
 
     if request.method == 'GET':
         return render(request, 'xliff_manager/request_review.html',
             {'reviewers': User.objects.filter(groups__name='Reviewer', userprofile__project=user_project).values('id', 'first_name', 'last_name').order_by('first_name', 'last_name'),
              'languages': Languages.objects.all().order_by('name'),
-             'tags_used': ReviewRequests.objects.values_list('info_tag', flat=True).distinct().order_by('date_created')
+             'tags_used': tags_used
             })
                            
     if request.method == 'POST':
