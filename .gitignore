@@ -1,8 +1,8 @@
 # General Python ignores
 *.pyc
 __pycache__/
-*.sqlite3
-*.sqlite3-journal
+# *.sqlite3
+# *.sqlite3-journal
 *.log
 /media
 /static
@@ -11,7 +11,6 @@ __pycache__/
 # Django ignores
 /secret.key  # Or whatever you name your secret key file
 local_settings.py
-# db.sqlite3
 .env
 xliff_manager/migrations/
 
