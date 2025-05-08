@@ -1,0 +1,22 @@
+# Build‐only env files 
+.env*
+
+
+# Python / Django artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.sqlite3
+
+# Virtual environments
+venv/
+
+# Auxiliary Dockerfiles
+Dockerfile*
+docker-compose*.yml
+
+
+# VCS, IDE, OS junk
+.git/
+.vscode/
+.DS_Store

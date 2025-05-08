@@ -17,16 +17,18 @@ from django.core.files.storage import FileSystemStorage
 
 from .models import Languages, TranslationsRequests, Translations_Units, ReviewRequests, LogDiary, CustomInstructions
 
-from postmarker.core import PostmarkClient
+#from postmarker.core import PostmarkClient
 
 from django.core.mail import send_mail
 
+"""
 if settings.SEND_EMAILS:
     #send_mail('Test', 'This is a test', 'esteve.graells@proton.me',['esteve.graells@gmail.com'],fail_silently=False)
     pass
 
+    #settings.LOGGER.debug(f"From settings.py TRANS_REQUESTS_FOLDER: {settings.TRANS_REQUESTS_FOLDER}, settings.SEND_EMAILS: {settings.SEND_EMAILS}")
+"""
 timespan = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-settings.LOGGER.debug(f"From settings.py TRANS_REQUESTS_FOLDER: {settings.TRANS_REQUESTS_FOLDER}, settings.SEND_EMAILS: {settings.SEND_EMAILS}")
 
             
 def userpage(request):

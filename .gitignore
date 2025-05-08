@@ -19,9 +19,9 @@ xliff_manager/migrations/
 .vscode/
 .vscode
 
-# Celery ignores (if you use Celery)
-celerybeat.pid
-celeryworker.pid
+# Config files
+config.json
+config.prod.db.json
 
 # OS generated files #
 ######################
@@ -34,3 +34,4 @@ Thumbs.db:encryptable
 # XLIFF files
 *.xlf
 translations_requests/**
+review_requests/**
