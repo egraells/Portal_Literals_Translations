@@ -8,29 +8,32 @@ from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
 MEDIA_URL = 'media/'
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = 'static/'
-
-# Get the environment variable DJANGO_ENV from the operating system to determine the environment 
-env = os.environ.get("DJANGO_ENV", "container").lower() 
-if env == "container":
-    dotenv_path = BASE_DIR / (".env.dev.container")
-elif env == "local":
-    dotenv_path = BASE_DIR / (".env.dev.local")
-load_dotenv(dotenv_path)
+STATIC_ROOT = BASE_DIR / "staticfiles"
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static') # Pot ser BASE_DIR /"staticfiles"
 
 TRANS_REQUESTS_FOLDER = os.environ.get("TRANS_REQUESTS_FOLDER")
 REV_REQUESTS_FOLDER = os.environ.get("REV_REQUESTS_FOLDER")
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
+# Read DJANGO_ENV operating system env variable to determine the environment 
+# env.de.local meaning local development without containers 
+env = os.environ.get("DJANGO_ENV", "container").lower() 
+if env == "local":
+    dotenv_path = BASE_DIR / (".env.dev.local")
+else:
+    dotenv_path = BASE_DIR / (".env.dev.container")
+
+load_dotenv(dotenv_path)
+
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS","https://127.0.0.1").split(",")
 
 # Application definition
 INSTALLED_APPS = [
@@ -81,12 +84,12 @@ WSGI_APPLICATION = 'xliff_project.wsgi.application'
 # Database config, read the variable from the environment or use default values
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("SQL_ENGINE"),
-        "NAME": os.environ.get("SQL_DATABASE"),
-        "USER": os.environ.get("SQL_USER"),
-        "PASSWORD": os.environ.get("SQL_PASSWORD"),
-        "HOST": os.environ.get("SQL_HOST"), # This is different for local development and container
-        "PORT": os.environ.get("SQL_PORT"),
+        "ENGINE": os.environ.get("DATABASE_ENGINE"),
+        "NAME": os.environ.get("DATABASE_NAME"),
+        "USER": os.environ.get("DATABASE_USERNAME"),
+        "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
+        "HOST": os.environ.get("DATABASE_HOST"), # This is different for local development and container
+        "PORT": os.environ.get("DATABASE_PORT"),
     }
 }
 
@@ -175,8 +178,4 @@ LOGGING = {
 #Logger parameters are defined at the end of this file
 LOGGER = logging.getLogger(__name__)
 
-# Seguretat
-# Example of conditional setting based on DEBUG
-if not DEBUG:
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
+LOGGER.debug(f"Loading environment variables for env: {env} from this path: {dotenv_path}")

@@ -12,7 +12,6 @@
                 <li>All requests are shown from newer to older <i class="bi bi-arrow-down-circle"></i>
             </ul>
         </div>
-
         
         <h2  style="margin-top: 30px">
             <i class="bi bi-person-fill"></i>
@@ -122,15 +121,19 @@
                     {% else %}
                         <td><span class="badge rounded-pill text-bg-primary">{{request.status}}</span></td> 
                     {% endif %} 
-                    <td style="font-size: smaller;">{{ request.date_created|date:"Y/m/d" }}</td>
+                    <td style="font-size: smaller;">{{ request.date_created|date:"Y/m/d H:i" }}</td>
                     <td style="font-size: smaller;">{{ request.info_tag|default_if_none:"-" }}</td>
                     <td style="font-size: smaller;">{{ request.date_reviewed_by_business|date:"Y/m/d"|default:"Not yet Reviewed" }}</td>
-                    <td>
-                        <a href="{% url 'download_file' type='Download_review_request_source_file' id=request.id file_to_download=request.target_xliff_file %}" 
-                            class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
+                    <td style="font-size: smaller;">
+                        {% if request.target_xliff_file %}
+                            <a href="{% url 'download_file' type='Download_review_request_source_file' id=request.id file_to_download=request.target_xliff_file %}" 
+                                class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
+                        {% else %}
+                            No file found
+                        {% endif %}
                     </td>
                     <td style="font-size: smaller;">
-                        {% if request.status == 'Reviewed' or request.status == 'Requester_Download_Review' %}
+                        {% if request.status == 'Reviewed' or request.status == 'Requester_Download_Review'  and request.target_xliff_file%}
                             <a href="{% url 'download_file' type='Download_review_request_target_file' id=request.id file_to_download=request.target_xliff_file %}"
                             class="btn btn-secondary btn-sm"> <i class="bi bi-file-earmark-arrow-down"></i> Download</a>
                         {% else %}
