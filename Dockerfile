@@ -56,6 +56,8 @@ USER appuser
  
 # Expose the application port
 EXPOSE 8000 
+# for debugging 
+EXPOSE 5678 
 
 # Make entry file executable
 RUN chmod +x  /app/entrypoint.prod.sh

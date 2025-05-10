@@ -20,6 +20,10 @@ services:
       - ./static:/app/staticfiles
     env_file:
       - .env.prod.container
+    ports:
+      - "8000:8000"              # Gunicorn
+      - "5678:5678"              # debugpy listener
+    command: [ "sh", "./entrypoint.debug.sh" ]
   
   frontend-proxy:
     image: nginx:1.27.5

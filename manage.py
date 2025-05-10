@@ -3,10 +3,17 @@
 import os
 import sys
 
+from django.conf import settings
+
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'xliff_project.settings')
+
+    if settings.DEBUG and os.environ.get("RUN_MAIN"):
+        import debugpy
+        debugpy.listen(("0.0.0.0", 5678))
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
