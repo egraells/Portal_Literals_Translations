@@ -9,10 +9,14 @@ __pycache__/
 .DS_Store
 
 # Django ignores
-/secret.key  # Or whatever you name your secret key file
+/secret.key  
 local_settings.py
-.env
-xliff_manager/migrations/
+.env*
+.env.*
+*.env
+*.env.*
+.env.*.*
+
 
 # VS Code ignores
 .vscode/
@@ -32,5 +36,6 @@ Thumbs.db:encryptable
 
 # XLIFF files
 *.xlf
+xliff_manager/migrations/
 translations_requests/**
 review_requests/**
