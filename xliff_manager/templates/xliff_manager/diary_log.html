@@ -29,55 +29,55 @@
     </div>
 
     {% for activity in activity_list%}
-    <ul class="list-group list-group-flush">
-        <li class="list-group-item" style="padding-top:2px; padding-bottom:2px; ">
-            <span class="badge text-bg-warning rounded-pill">
-                <i class="bi bi-calendar-date"></i>
-                {{ activity.date|date:"Y/m/d H:i" }} 
-            </span>
-            <span class="badge text-bg-success rounded-pill">
-                <i class="bi bi-person"></i>{{ activity.user.first_name }} {{ activity.user.last_name }} 
-            </span>
-            
-            <span class="badge text-bg-primary rounded-pill">{{ activity.action }}</span>
-            {% if activity.user_requested is not None%}
-                <i class="bi bi-arrow-right-circle-fill "></i>
-                <span class="badge text-bg-success rounded-pill">
-                    <i class="bi bi-person"></i>{{ activity.user_requested.first_name }} {{ activity.user_requested.last_name }}
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item" style="padding-top:2px; padding-bottom:2px; ">
+                <span class="badge text-bg-warning rounded-pill">
+                    <i class="bi bi-calendar-date"></i>
+                    {{ activity.date|date:"Y/m/d H:i" }} 
                 </span>
-            {%endif%}
+                <span class="badge text-bg-success rounded-pill">
+                    <i class="bi bi-person"></i>{{ activity.user.first_name }} {{ activity.user.last_name }} 
+                </span>
                 
-            {% if activity.translation_request_id or activity.review_request_id %}
-                <span class="badge text-bg-dark rounded-pill">
-                    Id: {{ activity.translation_request_id | default_if_none:'' }} {{ activity.review_request_id | default_if_none:'' }}
-                </span>
-            {% endif%}
+                <span class="badge text-bg-primary rounded-pill">{{ activity.action }}</span>
+                {% if activity.user_requested is not None%}
+                    <i class="bi bi-arrow-right-circle-fill "></i>
+                    <span class="badge text-bg-success rounded-pill">
+                        <i class="bi bi-person"></i>{{ activity.user_requested.first_name }} {{ activity.user_requested.last_name }}
+                    </span>
+                {%endif%}
+                    
+                {% if activity.translation_request_id or activity.review_request_id %}
+                    <span class="badge text-bg-dark rounded-pill">
+                        Id: {{ activity.translation_request_id | default_if_none:'' }} {{ activity.review_request_id | default_if_none:'' }}
+                    </span>
+                {% endif%}
 
-            {% if activity.translation_request.language %}
-            <span class="badge text-bg-light rounded-pill">
-                    <span class="fi fi-{{ activity.translation_request.language.flag_iso_value}}"></span>
-                    {{ activity.translation_request.language.name }}</td>
-                </span>
-            {% endif %}
+                {% if activity.translation_request.language %}
+                <span class="badge text-bg-light rounded-pill">
+                        <span class="fi fi-{{ activity.translation_request.language.flag_iso_value}}"></span>
+                        {{ activity.translation_request.language.name }}</td>
+                    </span>
+                {% endif %}
 
-            {% if activity.review_request.language %}
-            <span class="badge text-bg-light rounded-pill">
-                    <span class="fi fi-{{ activity.review_request.language.flag_iso_value}}"></span>
-                    {{ activity.review_request.language.name }}</td>
-                </span>
-            {% endif %}
-            
-            {% if activity.additional_info %}
-                <span class="badge text-bg-light rounded-pill">Details: {{ activity.additional_info|default_if_none:'None' }}</span>
-            {% endif %}
+                {% if activity.review_request.language %}
+                <span class="badge text-bg-light rounded-pill">
+                        <span class="fi fi-{{ activity.review_request.language.flag_iso_value}}"></span>
+                        {{ activity.review_request.language.name }}</td>
+                    </span>
+                {% endif %}
+                
+                {% if activity.additional_info %}
+                    <span class="badge text-bg-light rounded-pill">Details: {{ activity.additional_info|default_if_none:'None' }}</span>
+                {% endif %}
 
-            {% if user.userprofile and user.userprofile.project.id == 0 %}
-                <span class="badge text-bg-success rounded-pill">
-                    <i class="bi bi-diagram-3"></i> {{ activity.user.userprofile.project.name }} 
-                </span>
-            {% endif %}
-        </li>
-    </ul>
+                {% if user.userprofile and user.userprofile.project.id == 0 %}
+                    <span class="badge text-bg-success rounded-pill">
+                        <i class="bi bi-diagram-3"></i> {{ activity.user.userprofile.project.name }} 
+                    </span>
+                {% endif %}
+            </li>
+        </ul>
     {% endfor %}
 
 {% endblock %}

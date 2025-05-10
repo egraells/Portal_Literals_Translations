@@ -17,16 +17,18 @@ from django.core.files.storage import FileSystemStorage
 
 from .models import Languages, TranslationsRequests, Translations_Units, ReviewRequests, LogDiary, CustomInstructions
 
-from postmarker.core import PostmarkClient
+#from postmarker.core import PostmarkClient
 
 from django.core.mail import send_mail
 
+"""
 if settings.SEND_EMAILS:
     #send_mail('Test', 'This is a test', 'esteve.graells@proton.me',['esteve.graells@gmail.com'],fail_silently=False)
     pass
 
+    #settings.LOGGER.debug(f"From settings.py TRANS_REQUESTS_FOLDER: {settings.TRANS_REQUESTS_FOLDER}, settings.SEND_EMAILS: {settings.SEND_EMAILS}")
+"""
 timespan = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-settings.LOGGER.debug(f"From settings.py TRANS_REQUESTS_FOLDER: {settings.TRANS_REQUESTS_FOLDER}, settings.SEND_EMAILS: {settings.SEND_EMAILS}")
 
             
 def userpage(request):
@@ -88,6 +90,8 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
         
     if not is_user_allowed_to_download(request.user, type, id):
         return HttpResponse("You are not allowed to download the requested file", status=400)
+    else:
+        settings.LOGGER.debug(f"--> User {request.user.username} is allowed to download the file")
 
     # Requires explicit confirmation from the user to comply with Novartis SOP
     if request.method == 'GET' and type == 'Download_trans_request_AItranslated_file':
@@ -104,8 +108,10 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
             file_path = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(id), file_to_download)
         elif type in ['Download_trans_request_AItranslated_file_confirmed', 'Download_trans_request_source_file']:
             file_path = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(id), file_to_download)
+        
+        settings.LOGGER.debug(f"--> File path to download: {file_path}")
 
-        settings.LOGGER.debug(f"File path to download: {file_path}")
+        settings.LOGGER.debug(f"--> File path to download: {file_path}")
         if os.path.exists(file_path):
             with open(file_path, 'rb') as f:
                 response = HttpResponse(f.read(), content_type='application/force-download')
@@ -356,7 +362,7 @@ def request_translation_view(request):
                 trans_request.save()
 
                 location = os.path.join(settings.MEDIA_ROOT, settings.TRANS_REQUESTS_FOLDER, str(trans_request.id))
-                settings.LOGGER.debug(f"This folder will be used to upload the files: {location}")
+                settings.LOGGER.debug(f"--> This folder will be used to upload the files: {location}")
 
                 # Create the directory if it doesn't exist
                 if not os.path.exists(location):
@@ -474,20 +480,18 @@ def request_review_view(request):
                 review_request.save()
 
                 # Create a FileSystemStorage instance for the upload directory within MEDIA_ROOT
-
                 location = os.path.join(settings.MEDIA_ROOT, settings.REV_REQUESTS_FOLDER, str(review_request.id))
-                settings.LOGGER.debug(f"This folder will be used to upload the review file: {location}")
+                settings.LOGGER.debug(f"--> This folder will be used to upload the review file: {location}")
 
                 # Create the directory if it doesn't exist
                 if not os.path.exists(location):
-                    os.makedirs(location, exist_ok=True)
-                    os.chmod(location, 0o664)  # 664 means read/write for owner and group, read for others 
+                    os.makedirs(location, exist_ok=True) # 775 means read/write/exec for the owner and group (for folders), can't use 664 as it can cd into it 
+                    os.chmod(location, 0o777)
 
-                # Create the FileSystemStorage
+                # Create the FileSystemStorage and save the 
                 fs = FileSystemStorage(location=location, base_url=settings.MEDIA_URL + settings.REV_REQUESTS_FOLDER + f'/{review_request.id}/')
-
-                # Save the uploaded file
                 target_xliff_filename = fs.save(uploaded_xliff_file.name, uploaded_xliff_file)
+
                 review_request.target_xliff_file = target_xliff_filename
                 review_request.save()
 
