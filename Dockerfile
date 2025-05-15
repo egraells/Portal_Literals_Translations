@@ -44,21 +44,27 @@ RUN find /app -type f -name "*.sh" -exec dos2unix {} \; \
 
 # 4) Create media dirs and log files, then set perms
 RUN mkdir -p /app/media/translation_requests/\
- && mkdir -p /app/media/review_requests/ \
- && mkdir -p /app/staticfiles \
- && touch  /app/ai_translator_frontend.log \
+ && mkdir -p /app/media/review_requests/
+
+RUN chown -R appuser:appuser /app/media/ \
+ && chown -R appuser:appuser /app/media/review_requests/ \
+ && chown -R appuser:appuser /app/media/review_requests/ 
+
+RUN mkdir -p /app/staticfiles \
+ && chown -R appuser:appuser /app/staticfiles/ \ 
+ && chmod -R u+rwX /app/media/ /app/staticfiles/
+ 
+RUN touch  /app/ai_translator_frontend.log \
            /app/ai_translator_backend.log \
            /app/ai_translator_scheduler.log \
  && chown appuser:appuser /app/ai_translator_frontend.log \
                           /app/ai_translator_backend.log \
                           /app/ai_translator_scheduler.log \
- && chown -R appuser:appuser /app/media/ /app/staticfiles/ \
- && chmod -R u+rwX /app/media/ /app/staticfiles/ \
  && chmod u+rw  /app/ai_translator_frontend.log \
                 /app/ai_translator_backend.log \
                 /app/ai_translator_scheduler.log
 
-# 5) Fix line endings & ensure your shell scripts are executable
+
 # 5) Fix line endings & ensure your shell scripts are executable
 RUN dos2unix /app/entrypoint.sh \
  && dos2unix /app/aitranslator_batch_process/scheduler_ai.py \
