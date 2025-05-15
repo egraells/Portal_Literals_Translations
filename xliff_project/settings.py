@@ -19,20 +19,23 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 TRANS_REQUESTS_FOLDER = os.environ.get("TRANS_REQUESTS_FOLDER")
 REV_REQUESTS_FOLDER = os.environ.get("REV_REQUESTS_FOLDER")
 
-# Read DJANGO_ENV operating system env variable to determine the environment 
+# Read the env variable to determine the environment 
 # env.de.local meaning local development without containers 
-env = os.environ.get("DJANGO_ENV", "container").lower() 
-if env == "local":
-    dotenv_path = BASE_DIR / (".env.dev.local")
+is_dev = os.environ.get("IS_DEVELOPMENT_ENV")
+dotenv_path = ""
+if is_dev == "TRUE":
+    dotenv_path = BASE_DIR / (".env.dev")
+    DEBUG = False
 else:
-    dotenv_path = BASE_DIR / (".env.dev.container")
+    dotenv_path = BASE_DIR / (".env.prod")
+    DEBUG = True
 
 load_dotenv(dotenv_path)
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
-DEBUG = bool(os.environ.get("DEBUG", default=0))
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
-CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS","https://127.0.0.1").split(",")
+
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split() if os.environ.get("DJANGO_ALLOWED_HOSTS") else []
+CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "https://127.0.0.1").split(",")
 
 # Application definition
 INSTALLED_APPS = [
@@ -158,7 +161,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
-            'filename': os.path.join(BASE_DIR, 'app_portal.log'),  # Replace with your desired path
+            'filename': os.path.join(BASE_DIR, 'ai_translator_frontend.log'),  # Replace with your desired path
         },
     },
     'loggers': {
@@ -177,4 +180,4 @@ LOGGING = {
 #Logger parameters are defined at the end of this file
 LOGGER = logging.getLogger(__name__)
 
-LOGGER.debug(f"Loading environment variables for env: {env} from this path: {dotenv_path}")
+LOGGER.debug(f"⌨️ Loading environment variables for env: {is_dev} from this path: {dotenv_path}")

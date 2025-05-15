@@ -10,8 +10,8 @@ from django.utils.text import get_valid_filename
 class Projects(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_last_modified = models.DateTimeField(auto_now=True)
+    date_created = models.DateTimeField(default=timezone.now)
+    date_last_modified = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.name
@@ -43,7 +43,7 @@ class TranslationsRequests(models.Model):
         # This function is not strictly necessary in this form, 
         # but it is useful to have it in case we need to change 
         # the folder structure in the future
-        filename = get_valid_filename(filename) # TODO: test this
+        filename = get_valid_filename(filename) 
         return os.path.join(settings.TRANS_REQUESTS_FOLDER, filename)
     
     project = models.ForeignKey('Projects', on_delete=models.CASCADE, default=0)
@@ -54,29 +54,14 @@ class TranslationsRequests(models.Model):
     prompt_addition_file = models.FileField(upload_to=upload_to_folder)
     literals_to_exclude_file = models.FileField(upload_to=upload_to_folder)
     literalpatterns_to_exclude_file = models.FileField(upload_to=upload_to_folder)
-    date_created = models.DateTimeField(auto_now_add=True)
+    date_created = models.DateTimeField(default=timezone.now)
     date_started_on_llm = models.DateTimeField(null=True, blank=True)    
     date_received_from_llm = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=100, default='Created') 
 
     def save(self, *args, **kwargs):
         if self.status == 'Created':
-            # Every time a new translation request is created, we need to send it to the LLM
-            # Create a new thread to send translations to the LLM
-            #print(f"Request Saved")
-            #print(f"A New Thread Should be created to send the translations to the LLM")
-            
-            """
-            def translation_thread():
-                # Local import to avoid circular dependency
-                from .aitranslator import main_translator as aitranslator
-                aitranslator.execute_pending_requests(self)
-
-            import threading
-            translation_thread = threading.Thread(target=translation_thread)
-            translation_thread.start()
-            """
-
+            pass
         elif self.status == 'Started_on_LLM':
             self.date_started_on_llm = timezone.now()
         
@@ -123,7 +108,7 @@ class Translations_Units(models.Model):
 class LogDiary(models.Model):
     
     project = models.ForeignKey('Projects', on_delete=models.CASCADE, default='0')
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_requested = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviewer', null=True, blank=True) 
     action = models.CharField(max_length=100) 
@@ -178,7 +163,7 @@ class CustomInstructions(models.Model):
     user_last_modification = models.ForeignKey(User, on_delete=models.CASCADE)
     language = models.ForeignKey('Languages', on_delete=models.CASCADE)
     instructions = models.TextField(null=True, blank=True)
-    date_last_modification = models.DateTimeField(auto_now=True)
+    date_last_modification = models.DateTimeField(default=timezone.now)
 
     class Meta: 
         ordering = ['-date_last_modification']

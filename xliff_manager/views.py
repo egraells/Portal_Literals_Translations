@@ -30,6 +30,11 @@ if settings.SEND_EMAILS:
 """
 timespan = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+is_dev = os.environ.get("IS_DEVELOPMENT_ENV")
+if is_dev == "TRUE":
+    settings.LOGGER.debug(f"--> 🌍  Running in local Development environment {is_dev}")
+else:
+    settings.LOGGER.debug(f"--> 🌍 Running in Production environment {is_dev}")
             
 def userpage(request):
     return render(request, 'xliff_manager/userpage.html')
@@ -89,7 +94,7 @@ def download_file(request, type:str=None, id:str=None, file_to_download:str=None
         return HttpResponse("The Id requested does not exist", status=400)
         
     if not is_user_allowed_to_download(request.user, type, id):
-        return HttpResponse("You are not allowed to download the requested file", status=400)
+        return HttpResponse("You are not allowed to download this requested file", status=400)
     else:
         settings.LOGGER.debug(f"--> User {request.user.username} is allowed to download the file")
 
@@ -331,7 +336,7 @@ def request_translation_view(request):
 
     if request.method == 'GET':
         languages = Languages.objects.all().order_by('name')
-        return render(request, 'xliff_manager/request_llm_translation.html', 
+        return render(request,  'xliff_manager/request_llm_translation.html', 
             {'languages': languages,}
         )
     

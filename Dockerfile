@@ -1,66 +1,75 @@
-# pull official base image
+# ──── Builder stage ───────────────────────────────────────────────────────
 FROM python:3.11.12-slim AS builder
 
-# Create the app directory
-RUN mkdir /app
-
-# set work directory: foler inside the container for the app code
 WORKDIR /app
-
-# Set environment variables: 
-# Prevents Python from writing pyc files to disc and 
 ENV PYTHONDONTWRITEBYTECODE=1
-# Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1
 
-# Install dependencies first for caching benefit
-RUN pip install --upgrade pip 
-COPY requirements.txt /app/ 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# copy from the root of the project to the work directory in the container
-# COPY . .
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
 
-# Stage 2: Production stage
-FROM python:3.11.12-slim
- 
-# Create a non-root user
-# This is a best practice for security reasons
-RUN useradd -m -r appuser && \
-   mkdir /app && \
-   chown -R appuser /app
- 
-# Copy the Python dependencies from the builder stage
-COPY --from=builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
-COPY --from=builder /usr/local/bin/ /usr/local/bin/
- 
-# Set the working directory
+COPY . /app
+
+# ──── Final runtime stage ─────────────────────────────────────────────────
+FROM python:3.11.12-slim AS final
+
+# 0) Install dos2unix for line-ending sanity
+RUN apt-get update \
+    && apt-get install -y dos2unix \
+    && rm -rf /var/lib/apt/lists/*
+
+# 1) Create non-root user, set up the working directory, and set the environment variable to container
+RUN useradd -m appuser
 WORKDIR /app
- 
-# Copy application code, except for files in .dockerignore and 
-# assign the user and group ownership to the non-root user
-COPY --chown=appuser:appuser . .
 
-# Create the folders for saving translations and review requests
-RUN mkdir /app/media && chmod 755 /app/media && chown appuser:appuser /app/media
-RUN mkdir /app/media/review_requests && chmod 755 /app/media/review_requests && chown appuser:appuser /app/media/review_requests
-RUN mkdir /app/media/translation_requests && chmod 755 /app/media/translation_requests && chown appuser:appuser /app/media/translation_requests
 
- 
-# Set environment variables to optimize Python
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1 
- 
-# Switch to non-root user
+# 2) Install Python deps
+COPY --from=builder /wheels /wheels
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt \
+    && rm -rf /wheels
+
+# 3) Copy *all* of your application _and_ staticfiles, logs, scheduler, etc.
+#    in one go, with the right owner, so we never need another chown later.
+COPY --from=builder --chown=appuser:appuser /app /app
+
+# Normalize all .sh scripts: convert to LF and make executable
+RUN find /app -type f -name "*.sh" -exec dos2unix {} \; \
+ && find /app -type f -name "*.sh" -exec chmod +x {} \;
+
+# 4) Create media dirs and log files, then set perms
+RUN mkdir -p /app/media/translation_requests/\
+ && mkdir -p /app/media/review_requests/ \
+ && mkdir -p /app/staticfiles \
+ && touch  /app/ai_translator_frontend.log \
+           /app/ai_translator_backend.log \
+           /app/ai_translator_scheduler.log \
+ && chown appuser:appuser /app/ai_translator_frontend.log \
+                          /app/ai_translator_backend.log \
+                          /app/ai_translator_scheduler.log \
+ && chown -R appuser:appuser /app/media/ /app/staticfiles/ \
+ && chmod -R u+rwX /app/media/ /app/staticfiles/ \
+ && chmod u+rw  /app/ai_translator_frontend.log \
+                /app/ai_translator_backend.log \
+                /app/ai_translator_scheduler.log
+
+# 5) Fix line endings & ensure your shell scripts are executable
+# 5) Fix line endings & ensure your shell scripts are executable
+RUN dos2unix /app/entrypoint.sh \
+ && dos2unix /app/aitranslator_batch_process/scheduler_ai.py \
+ && chmod +x /app/entrypoint.sh \
+ && chmod +x /app/aitranslator_batch_process/scheduler_ai.py
+
+# 6) Drop to the non-root user
 USER appuser
- 
-# Expose the application port
-EXPOSE 8000 
-# for debugging 
-EXPOSE 5678 
 
-# Make entry file executable
-RUN chmod +x  /app/entrypoint.prod.sh
- 
-# Start the application using Gunicorn
-CMD ["/app/entrypoint.prod.sh"]
+EXPOSE 8000
+
+# Depending on the value of the environment variable IS_DEVELOPMENT_ENV, 
+# run the appropriate entrypoint script which is set in Docker compose files
+CMD ["/app/entrypoint.sh"]
