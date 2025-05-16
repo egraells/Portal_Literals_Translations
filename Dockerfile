@@ -27,7 +27,6 @@ RUN apt-get update \
 RUN useradd -m appuser
 WORKDIR /app
 
-
 # 2) Install Python deps
 COPY --from=builder /wheels /wheels
 COPY requirements.txt /app/
@@ -40,6 +39,7 @@ COPY --from=builder --chown=appuser:appuser /app /app
 
 # Normalize all .sh scripts: convert to LF and make executable
 RUN find /app -type f -name "*.sh" -exec dos2unix {} \; \
+ && find /app -type f -name "*.sh" -exec chown appuser:appuser {} \; \
  && find /app -type f -name "*.sh" -exec chmod +x {} \;
 
 # 4) Create media dirs and log files, then set perms
@@ -64,12 +64,8 @@ RUN touch  /app/ai_translator_frontend.log \
                 /app/ai_translator_backend.log \
                 /app/ai_translator_scheduler.log
 
-
 # 5) Fix line endings & ensure your shell scripts are executable
-RUN dos2unix /app/entrypoint.sh \
- && dos2unix /app/aitranslator_batch_process/scheduler_ai.py \
- && chmod +x /app/entrypoint.sh \
- && chmod +x /app/aitranslator_batch_process/scheduler_ai.py
+RUN chmod +x /app/aitranslator_batch_process/scheduler_ai.py
 
 # 6) Drop to the non-root user
 USER appuser

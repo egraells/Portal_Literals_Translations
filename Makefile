@@ -1,4 +1,4 @@
-# Makefile for managing Docker dev and prod environments
+# Makefile for managing Docker dev and prod environments in *unix boxes
 
 APP_NAME = ai-translator
 

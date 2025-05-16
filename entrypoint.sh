@@ -4,7 +4,6 @@ set -euo pipefail
 
 echo "🚀  Starting application using entrypoint.sh at $(date)" | tee -a /app/ai_translator_backend.log
 
-
 # Start scheduler
 nohup python /app/aitranslator_batch_process/scheduler_ai.py >> /app/ai_translator_backend.log 2>&1 &
 
