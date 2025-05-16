@@ -30,7 +30,7 @@ if settings.SEND_EMAILS:
 """
 timespan = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-is_dev = os.environ.get("IS_DEVELOPMENT_ENV")
+is_dev = os.environ.get("IS_DEVELOPMENT_ENV") 
 if is_dev == "TRUE":
     settings.LOGGER.debug(f"--> 🌍  Running in local Development environment {is_dev}")
 else:

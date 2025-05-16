@@ -4,7 +4,7 @@ import os
 class LoggerManager:
     _instance = None  # Singleton instance
 
-    BACKEND_LOG_FILE = os.getenv("LOG_FILE_BACKEND")
+    BACKEND_LOG_FILE = os.environ.get("LOG_FILE_BACKEND")
     def __new__(cls, log_file=BACKEND_LOG_FILE):
         if cls._instance is None:
             cls._instance = super(LoggerManager, cls).__new__(cls)

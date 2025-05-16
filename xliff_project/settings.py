@@ -16,26 +16,6 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 # STATIC_ROOT = os.path.join(BASE_DIR, 'static') # Pot ser BASE_DIR /"staticfiles"
 
-TRANS_REQUESTS_FOLDER = os.environ.get("TRANS_REQUESTS_FOLDER")
-REV_REQUESTS_FOLDER = os.environ.get("REV_REQUESTS_FOLDER")
-
-# Read the env variable to determine the environment 
-# env.de.local meaning local development without containers 
-is_dev = os.environ.get("IS_DEVELOPMENT_ENV")
-dotenv_path = ""
-if is_dev == "TRUE":
-    dotenv_path = BASE_DIR / (".env.dev")
-    DEBUG = False
-else:
-    dotenv_path = BASE_DIR / (".env.prod")
-    DEBUG = True
-
-load_dotenv(dotenv_path)
-
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
-
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split() if os.environ.get("DJANGO_ALLOWED_HOSTS") else []
-CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "https://127.0.0.1").split(",")
 
 # Application definition
 INSTALLED_APPS = [
@@ -80,9 +60,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'xliff_project.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+# Read the env variable to determine the environment 
+# env.de.local meaning local development without containers 
+is_dev = os.environ.get("IS_DEVELOPMENT_ENV")
+dotenv_path = ""
+if is_dev == "TRUE":
+    dotenv_path = BASE_DIR / (".env.dev")
+    DEBUG = False
+else:
+    dotenv_path = BASE_DIR / (".env.prod")
+    DEBUG = True
 
+load_dotenv(dotenv_path)
+
+TRANS_REQUESTS_FOLDER = os.environ.get("TRANS_REQUESTS_FOLDER")
+REV_REQUESTS_FOLDER = os.environ.get("REV_REQUESTS_FOLDER")
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split() if os.environ.get("DJANGO_ALLOWED_HOSTS") else []
+CSRF_TRUSTED_ORIGINS = os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "https://127.0.0.1").split(",")
+
+# Database # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 # Database config, read the variable from the environment or use default values
 DATABASES = {
     "default": {

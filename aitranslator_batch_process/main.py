@@ -370,7 +370,8 @@ if __name__ == "__main__":
     logger = logger_manager.get_logger()
     logger.info("Starting the translation process...")
 
-    # Load environment variables from .env file
+    # Load environment variables from .env file 
+    # #TODO això realment cal, si ja ho estem fent a settings.py?
     is_dev = os.environ.get("IS_DEVELOPMENT_ENV")
     if is_dev == "TRUE":
         dotenv_path = ".env.prod"
@@ -386,21 +387,21 @@ if __name__ == "__main__":
         logger.info(f"Loading environment variables from: {dotenv_path}")
         load_dotenv()
 
-    BACKEND_LOG_FILE = os.getenv("LOG_FILE_BACKEND")
+    BACKEND_LOG_FILE = os.environ.get("LOG_FILE_BACKEND")
     with open(BACKEND_LOG_FILE, "a") as f:
         f.write(f"Hearthbit: {datetime.now(timezone.utc).isoformat()}\n")
 
-    DATABASE_HOST     = os.getenv("DATABASE_HOST")
-    DATABASE_PORT     = os.getenv("DATABASE_PORT")
-    DATABASE_DATABASE = os.getenv("DATABASE_NAME")
-    DATABASE_USER     = os.getenv("DATABASE_USERNAME")
-    DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD", "")
+    DATABASE_HOST     = os.environ.get("DATABASE_HOST")
+    DATABASE_PORT     = os.environ.get("DATABASE_PORT")
+    DATABASE_DATABASE = os.environ.get("DATABASE_NAME")
+    DATABASE_USER     = os.environ.get("DATABASE_USERNAME")
+    DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD", "")
 
-    TRANS_REQUESTS_FOLDER = os.path.join('media', os.getenv("TRANS_REQUESTS_FOLDER", ""))
+    TRANS_REQUESTS_FOLDER = os.path.join('media', os.environ.get("TRANS_REQUESTS_FOLDER", ""))
 
-    _CLIENT_ID = os.getenv("CLIENT_ID", "")
-    _CLIENT_SECRET = os.getenv("CLIENT_SECRET", "")
-    _TOKEN_URL = os.getenv("TOKEN_URL", "")
+    _CLIENT_ID = os.environ.get("CLIENT_ID", "")
+    _CLIENT_SECRET = os.environ.get("CLIENT_SECRET", "")
+    _TOKEN_URL = os.environ.get("TOKEN_URL", "")
 
     logger.info(f"PostgreSQL settings - {DATABASE_DATABASE} host:port-> {DATABASE_HOST}:{DATABASE_PORT}")
 
