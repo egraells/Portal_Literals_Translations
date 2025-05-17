@@ -6,7 +6,7 @@ __pycache__/
 *.log
 /media
 /static
-.DS_Store
+.DS_Store 
 
 # Django ignores
 /secret.key  
@@ -36,6 +36,13 @@ Thumbs.db:encryptable
 
 # XLIFF files
 *.xlf
-xliff_manager/migrations/
-translations_requests/**
+# Ignores everything in the migrations folder.
+xliff_manager/migrations/* 
+# Ensures the folder itself is not ignored.
+!xliff_manager/migrations/ 
+# Re-includes only the seed migration files.
+!xliff_manager/migrations/*_seed.py 
+
+# Ignore all generated files from user requests
+translation_requests/**
 review_requests/**
