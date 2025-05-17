@@ -13,6 +13,9 @@ python manage.py collectstatic --noinput
 # Run any pending DB migrations
 python manage.py migrate --noinput
 
+# Create a superuser if it doesn't exist (createsu.py)
+python manage.py createsu              
+
 # Start Gunicorn based on environment
 if [ "$IS_DEVELOPMENT_ENV" = "TRUE" ]; then
   echo "🚀  We are in DEVELOPMENT environment" | tee -a /app/ai_translator_backend.log

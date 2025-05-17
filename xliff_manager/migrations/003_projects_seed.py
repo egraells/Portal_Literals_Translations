@@ -3,6 +3,7 @@ from django.db import migrations
 def seed_projects(apps, schema_editor):
     Project = apps.get_model('xliff_manager', 'Projects')
     projects = [
+        {'name': 'ALL_PROJECTS'},
         {'name': '1PSP'},
         {'name': '1QEM'},
         {'name': 'LEAP'},
